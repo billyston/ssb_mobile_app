@@ -334,8 +334,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
           outlineBorderRadius: 10,
           otpFieldStyle: OtpFieldStyle(
               borderColor: textFieldColor,
-              backgroundColor: const Color(0xFF303030),
-              focusBorderColor: const Color(0xFF303030)
+              backgroundColor: blackFaded,
+              focusBorderColor: blackFaded
           ),
           controller: otp,
           length: 6,
@@ -717,7 +717,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 disabledBackgroundColor: textFieldColor
             ),
             onPressed: null,
-            child: Text('Create Account',
+            child: Text('Create PIN',
                 style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400, color: Colors.grey)),
           ),
         )

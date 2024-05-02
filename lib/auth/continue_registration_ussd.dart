@@ -16,6 +16,7 @@ class _RegisterUserUssdState extends State<RegisterUserUssd> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
+  bool isChecked = false;
   bool enableButton = false;
   bool passwordVisible = true;
 
@@ -41,35 +42,15 @@ class _RegisterUserUssdState extends State<RegisterUserUssd> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Complete Registration',
+                Text('Complete your\nregistration',
                     style: TextStyle(
                         fontSize: 30.sp,
                         fontWeight: FontWeight.w500,
-                        color: Colors.white)),
-                SizedBox(height: 15.h),
-                Text('Enter email and password to complete your registration',
-                    style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w300,
                         color: Colors.white)
                 ),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.08),
                 TextFormField(
                   controller: emailController,
-                  validator: (value) {
-                    if (value == '') {
-                      return 'Email address cannot be empty';
-                    } else if(value == ''){
-                      return 'Email address is invalid';
-                  } else {
-                      return null;
-                    }
-                  },
-                  onChanged: (value) {
-                    setState(() {
-                      enableButton = emailController.text.contains('@') && passwordController.text.length > 5;
-                    });
-                  },
                   decoration: InputDecoration(
                       hintText: 'Email address',
                       suffixIcon: emailController.text.contains('@')
@@ -115,30 +96,78 @@ class _RegisterUserUssdState extends State<RegisterUserUssd> {
                   ),
                   style: TextStyle(fontSize: 18.sp, color: Colors.white, fontWeight: FontWeight.w300),
                 ),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.04),
+                Row(
+                  children: [
+                    Checkbox(
+                      value: isChecked,
+                      activeColor: buttonColor,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          isChecked = value!;
+                        });
+                      },
+                    ),
+                    Text(
+                      'By checking the box you agree to our',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w400),
+                    ),
+                    GestureDetector(
+                      onTap: () {},
+                      child: Text(
+                        ' Terms ',
+                        style: TextStyle(
+                            color: buttonColor,
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w400),
+                      ),
+                    ),
+                    Text(
+                      'and',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w400),
+                    ),
+                    Text(
+                      ' Conditions',
+                      style: TextStyle(
+                          color: buttonColor,
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w400),
+                    ),
+                  ],
+                ),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.05),
                 enableButton == false
                     ? Center(
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                        fixedSize: Size(MediaQuery.of(context).size.width * 0.55, 50),
+                        fixedSize: Size(MediaQuery.of(context).size.width * 0.4, 50),
                         disabledBackgroundColor: textFieldColor
                     ),
                     onPressed: null,
-                    child: Text('Create Account',
+                    child: Text('Finish',
                         style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400, color: Colors.grey)),
                   ),
                 )
                     : Center(
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                        fixedSize: Size(MediaQuery.of(context).size.width * 0.55, 50)
+                        fixedSize: Size(MediaQuery.of(context).size.width * 0.4, 50)
                     ),
                     onPressed: () {
-                      if (formKey.currentState?.validate() ?? true) {
+                      if (!isChecked) {
+                        showToastMessage('Please accept terms and conditions');
+                      }
+                      else{
 
                       }
                     },
-                    child: Text('Create Account',
+                    child: Text('Finish',
                         style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400, color: Colors.white)),
                   ),
                 ),

@@ -1,6 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:susubox/auth/continue_registration_ussd.dart';
 import 'package:susubox/auth/login.dart';
 import 'package:susubox/auth/register_screen.dart';
 import 'package:susubox/utils/utils.dart';
@@ -34,7 +35,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     return SafeArea(
       child: Scaffold(
         body: Padding(
-          padding: EdgeInsets.only(left: 20.w),
+          padding: EdgeInsets.only(left: 15.w),
           child: Column(
             children: [
               SizedBox(height: MediaQuery.of(context).size.height * 0.07),
@@ -62,7 +63,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   return Container(
                     alignment: Alignment.bottomLeft,
                     margin: EdgeInsets.only(right: 10.w),
-                    width: MediaQuery.of(context).size.width * 0.8,
+                    width: MediaQuery.of(context).size.width * 0.85,
                     padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 15.w),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
@@ -139,8 +140,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     fixedSize: Size(MediaQuery.of(context).size.width * 0.6, 50)
                 ),
                 onPressed: () {
-                    Route route = MaterialPageRoute(builder: (c) => const RegisterScreen());
-                    Navigator.push(context, route);
+                  Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                  );
                 },
                 child: Text('Get started for free',
                     style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400, color: Colors.white)),
@@ -151,8 +153,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     fixedSize: Size(MediaQuery.of(context).size.width * 0.6, 50)
                 ),
                 onPressed: () {
-                  Route route = MaterialPageRoute(builder: (c) => const LoginScreen());
-                  Navigator.push(context, route);
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => const LoginScreen()),
+                  );
                 },
                 child: Text('Login here',
                     style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400, color: Colors.white)),

@@ -6,8 +6,6 @@ import 'package:susubox/auth/register_screen.dart';
 import 'package:susubox/auth/welcome_screen.dart';
 import 'package:susubox/utils/utils.dart';
 
-import 'auth/login.dart';
-
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 

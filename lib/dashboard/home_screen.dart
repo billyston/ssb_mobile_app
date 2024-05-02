@@ -45,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 10.w),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: const Color(0xFF303030)
+                    color: blackFaded
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

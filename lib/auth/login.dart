@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:phone_form_field/phone_form_field.dart';
+import 'package:susubox/auth/reset_password.dart';
 import 'package:susubox/dashboard/home_screen.dart';
 import 'package:susubox/utils/utils.dart';
 
@@ -51,40 +52,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w300, color: Colors.white)
                 ),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.1),
-                /*TextFormField(
-                  inputFormatters: <TextInputFormatter>[
-                    LengthLimitingTextInputFormatter(10),
-                    FilteringTextInputFormatter.allow(RegExp('[0-9+]'))
-                  ],
-                  controller: phoneController,
-                  validator: (value) {
-                    if (value == null) {
-                      return 'Phone Number cannot be empty';
-                    } else if (value.length != 10) {
-                      return 'Phone Number is invalid';
-                    } else {
-                      return null;
-                    }
-                  },
-                  onChanged: (value) {
-                    setState(() {
-                      enableButton = phoneController.text.length == 10 && passwordController.text.length > 5;
-                    });
-                  },
-                  decoration: const InputDecoration(
-                    hintText: 'Phone Number',
-                  ),
-                  style: TextStyle(fontSize: 20.sp, color: Colors.white, fontWeight: FontWeight.w300),
-                  keyboardType: TextInputType.phone,
-                  textInputAction: TextInputAction.next,
-                ),*/
                 PhoneFormField(
                   initialValue: PhoneNumber.parse('+233'),
                   countrySelectorNavigator: const CountrySelectorNavigator.page(),
                   onChanged: (phoneNumber) {
-                    print('changed into $phoneNumber');
                     phoneController.text = '+${phoneNumber.countryCode}${phoneNumber.nsn}';
-                    print('Phone number $phoneController');
                   },
                   enabled: true,
                   isCountrySelectionEnabled: false,
@@ -152,7 +124,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(context,
+                            MaterialPageRoute(builder: (context) => const ResetPasswordScreen()),
+                          );
+                        },
                         child: Text('Forgot password?',
                             style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400, color: buttonColor)))
                   ],
@@ -177,8 +153,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     onPressed: () {
                        if (key.currentState?.validate() ?? true) {
-                         Route route = MaterialPageRoute(builder: (c) => const HomeScreen());
-                         Navigator.push(context, route);
+                          Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => const HomeScreen()),
+                         );
                        }
                     },
                     child: Text('Login',
