@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:susubox/dashboard/home_screen.dart';
-import 'package:susubox/utils/Utils.dart';
+import 'package:susubox/dashboard/settings_screen.dart';
+import 'package:susubox/dashboard/susu_screen.dart';
+import 'package:susubox/utils/utils.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -22,38 +25,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
         physics: const NeverScrollableScrollPhysics(),
         children: const <Widget>[
           HomeScreen(),
+          SusuScreen(),
+          SettingsScreen()
         ],
       ),
-      bottomNavigationBar:
-         BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-           backgroundColor: const Color(0xFFD9D9D9),
-          currentIndex: selectedIndex,
-          selectedItemColor: buttonColor,
-          unselectedItemColor: Colors.black,
-          onTap: (index) {
-            setState(() {
-              selectedIndex = index;
-              pageController.jumpToPage(index);
-            });
-          },
-          items: const [
+      bottomNavigationBar: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
+        child: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+             backgroundColor: bottomAppBarColor,
+            currentIndex: selectedIndex,
+            selectedItemColor: buttonColor,
+            unselectedItemColor: Colors.grey,
+            onTap: (index) {
+              setState(() {
+                selectedIndex = index;
+                pageController.jumpToPage(index);
+              });
+            },
+            items: [
 
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home,
-                size: 25,),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.support_agent),
-              label: 'Support',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.account_circle),
-              label: 'Profile',
-            ),
-          ],
-        ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home_filled, size: 15.h,),
+                label: 'Home',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.crop_square, size: 15.h),
+                label: 'Susu',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.settings, size: 15.h),
+                label: 'Settings',
+              ),
+            ],
+          ),
+      ),
     );
   }
 }

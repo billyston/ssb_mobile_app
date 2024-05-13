@@ -72,6 +72,9 @@ flutter:
   assets:
     - assets/loadingDialog.gif
     - assets/images/susu_logo.png
+    - assets/images/coins_bg.png
+    - assets/images/personal_susu_bg.jpg
+    - assets/images/biz_susu_bg.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

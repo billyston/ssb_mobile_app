@@ -2,9 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:phone_form_field/phone_form_field.dart';
+import 'package:susubox/auth/register_screen.dart';
 import 'package:susubox/auth/reset_password.dart';
+import 'package:susubox/dashboard/dashboard_screen.dart';
 import 'package:susubox/dashboard/home_screen.dart';
 import 'package:susubox/utils/utils.dart';
+
+/*
+  invalid number or password /
+  continue registration from ussd /
+  Your account has been suspended for further investigations. Please contact customer support for further assistance
+*/
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -21,7 +29,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool passwordVisible = true;
   bool enableButton = false;
-
 
   @override
   Widget build(BuildContext context) {
@@ -62,30 +69,29 @@ class _LoginScreenState extends State<LoginScreen> {
                   isCountrySelectionEnabled: false,
                   isCountryButtonPersistent: true,
                   countryButtonStyle: CountryButtonStyle(
+                    showDropdownIcon: false,
                     showDialCode: true,
                     showIsoCode: false,
                     showFlag: true,
-                    flagSize: 18.h,
+                    flagSize: 20.h,
                     textStyle: TextStyle(
-                        fontSize: 16.sp,
+                        fontSize: 14.sp,
                         color: Colors.white,
                         fontWeight: FontWeight.w300),
                   ),
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Phone Number',
-                    hintStyle: TextStyle(fontSize: 16.sp, color: Colors.grey)
                   ),
                   inputFormatters: <TextInputFormatter>[
                     LengthLimitingTextInputFormatter(11),
                     FilteringTextInputFormatter.allow(RegExp('[0-9+]'))
                   ],
                   style: TextStyle(
-                      fontSize: 18.sp,
+                      fontSize: 14.sp,
                       color: Colors.white,
                       fontWeight: FontWeight.w300),
                     textInputAction: TextInputAction.next
                 ),
-
                 SizedBox(height: 30.h),
                 TextFormField(
                   controller: passwordController,
@@ -118,7 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     )
                         : null,
                   ),
-                  style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w300, color: Colors.white),
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w300, color: Colors.white),
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -135,33 +141,31 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.06),
                 enableButton == false
-                ? Center(
-                  child: ElevatedButton(
+                ? ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      fixedSize: Size(MediaQuery.of(context).size.width * 0.7, 50),
+                      //fixedSize: Size(MediaQuery.of(context).size.width * 0.7, 50),
+                        minimumSize: const Size.fromHeight(50.0),
                       disabledBackgroundColor: textFieldColor
                     ),
                     onPressed: null,
                     child: Text('Login',
-                        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400, color: Colors.grey)),
-                  ),
+                        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400, color: Colors.grey)),
                 )
-                : Center(
-                  child: ElevatedButton(
+                : ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                        fixedSize: Size(MediaQuery.of(context).size.width * 0.7, 50)
+                      minimumSize: const Size.fromHeight(50.0),
+                        //fixedSize: Size(MediaQuery.of(context).size.width * 0.7, 50)
                     ),
                     onPressed: () {
                        if (key.currentState?.validate() ?? true) {
                           Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => const HomeScreen()),
+                          MaterialPageRoute(builder: (context) => const DashboardScreen()),
                          );
                        }
                     },
                     child: Text('Login',
                         style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400, color: Colors.white)),
                   ),
-                ),
                 SizedBox(height: 15.h),
               ],
             ),

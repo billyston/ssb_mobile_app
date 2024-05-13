@@ -12,6 +12,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    precacheImage(const AssetImage("assets/images/coins_bg.png"), context);
+    precacheImage(const AssetImage('assets/images/personal_susu_bg.jpg'), context);
+    precacheImage(const AssetImage("assets/images/biz_susu_bg.jpg"), context);
+
     return ScreenUtilInit(
       designSize: const Size(360, 640),
       builder: (BuildContext context, Widget? child) {
@@ -22,15 +27,15 @@ class MyApp extends StatelessWidget {
               inputDecorationTheme: InputDecorationTheme(
                   filled: true,
                   fillColor: textFieldColor,
-                  hintStyle: TextStyle(fontSize: 16.sp, color: Colors.grey),
+                  hintStyle: TextStyle(fontSize: 14.sp, color: Colors.grey),
                   contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20.0),
+                    borderRadius: BorderRadius.circular(10.0),
                     borderSide: const BorderSide(
                         color: Colors.black),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20.0),
+                    borderRadius: BorderRadius.circular(10.0),
                     borderSide: const BorderSide(
                         color: Colors.black),
                   ),
@@ -47,7 +52,7 @@ class MyApp extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: buttonColor,
                   textStyle: const TextStyle(color: Colors.white),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
                 ),
               ),
             ),

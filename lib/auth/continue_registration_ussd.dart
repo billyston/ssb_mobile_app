@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../utils/Utils.dart';
+import '../utils/utils.dart';
+import 'login.dart';
 
 class RegisterUserUssd extends StatefulWidget {
   const RegisterUserUssd({super.key});
@@ -36,7 +37,7 @@ class _RegisterUserUssdState extends State<RegisterUserUssd> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 15.w),
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
           child: Form(
             key: formKey,
             child: Column(
@@ -52,7 +53,7 @@ class _RegisterUserUssdState extends State<RegisterUserUssd> {
                 TextFormField(
                   controller: emailController,
                   decoration: InputDecoration(
-                      hintText: 'Email address',
+                      hintText: 'Email address (Optional)',
                       suffixIcon: emailController.text.contains('@')
                           ? null
                           :  const Icon(
@@ -60,7 +61,7 @@ class _RegisterUserUssdState extends State<RegisterUserUssd> {
                         color: buttonColor,
                       )
                   ),
-                  style: TextStyle(fontSize: 18.sp, color: Colors.white, fontWeight: FontWeight.w300),
+                  style: TextStyle(fontSize: 16.sp, color: Colors.white, fontWeight: FontWeight.w300),
                   textInputAction: TextInputAction.next,
                 ),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.03),
@@ -94,9 +95,9 @@ class _RegisterUserUssdState extends State<RegisterUserUssd> {
                       ) :
                       const Icon(Icons.lock, color: buttonColor)
                   ),
-                  style: TextStyle(fontSize: 18.sp, color: Colors.white, fontWeight: FontWeight.w300),
+                  style: TextStyle(fontSize: 16.sp, color: Colors.white, fontWeight: FontWeight.w300),
                 ),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.04),
+               /* SizedBox(height: MediaQuery.of(context).size.height * 0.04),
                 Row(
                   children: [
                     Checkbox(
@@ -140,36 +141,40 @@ class _RegisterUserUssdState extends State<RegisterUserUssd> {
                           fontWeight: FontWeight.w400),
                     ),
                   ],
-                ),
+                ), */
                 SizedBox(height: MediaQuery.of(context).size.height * 0.05),
                 enableButton == false
-                    ? Center(
-                  child: ElevatedButton(
+                    ? ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                        fixedSize: Size(MediaQuery.of(context).size.width * 0.4, 50),
+                        minimumSize: const Size.fromHeight(50),
                         disabledBackgroundColor: textFieldColor
                     ),
                     onPressed: null,
                     child: Text('Finish',
-                        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400, color: Colors.grey)),
-                  ),
+                        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400, color: Colors.grey)),
                 )
-                    : Center(
-                  child: ElevatedButton(
+                    : ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                        fixedSize: Size(MediaQuery.of(context).size.width * 0.4, 50)
+                        minimumSize: const Size.fromHeight(50)
                     ),
                     onPressed: () {
-                      if (!isChecked) {
-                        showToastMessage('Please accept terms and conditions');
-                      }
-                      else{
+                      showCongratulationMessage(context, 'Congratulations!',
+                          'Welcome! You have successfully subscribed to SusuBox. Enjoy the full convenience and safety of your susu savings, loans, investment, insurance and pensions.',
+                          'Login', () {
+                            Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(builder: (context) => const LoginScreen()), (_) => false
+                            );
+                          });
+                     // if (!isChecked) {
+                       // showToastMessage('Please accept terms and conditions');
+                     // }
+                     // else{
 
-                      }
+                     // }
                     },
                     child: Text('Finish',
-                        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400, color: Colors.white)),
-                  ),
+                        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400, color: Colors.white)),
                 ),
               ],
             ),

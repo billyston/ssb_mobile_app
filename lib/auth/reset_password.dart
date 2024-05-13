@@ -10,6 +10,7 @@ import 'package:phone_form_field/phone_form_field.dart';
 import 'package:telephony/telephony.dart';
 
 import '../utils/utils.dart';
+import 'login.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key});
@@ -135,7 +136,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         ),
         body: SingleChildScrollView(
           child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15.w),
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -181,12 +182,13 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             isCountrySelectionEnabled: false,
             isCountryButtonPersistent: true,
             countryButtonStyle: CountryButtonStyle(
+              showDropdownIcon: false,
               showDialCode: true,
               showIsoCode: false,
               showFlag: true,
               flagSize: 20.h,
               textStyle: TextStyle(
-                  fontSize: 18.sp,
+                  fontSize: 14.sp,
                   color: Colors.white,
                   fontWeight: FontWeight.w300),
             ),
@@ -198,30 +200,26 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               FilteringTextInputFormatter.allow(RegExp('[0-9+]'))
             ],
             style: TextStyle(
-                fontSize: 18.sp,
+                fontSize: 14.sp,
                 color: Colors.white,
                 fontWeight: FontWeight.w300),
           ),
           SizedBox(height: 30.h),
           enableFormOneButton == false
-              ? Center(
-            child: ElevatedButton(
+              ? ElevatedButton(
               style: ElevatedButton.styleFrom(
-                  fixedSize:
-                  Size(MediaQuery.of(context).size.width * 0.71, 50),
+                  minimumSize: const Size.fromHeight(50.0),
                   disabledBackgroundColor: textFieldColor),
               onPressed: null,
               child: Text('Confirm your phone number',
                   style: TextStyle(
-                      fontSize: 16.sp,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w400,
                       color: Colors.grey)),
-            ),
-          )
-              : Center(
-            child: ElevatedButton(
+            )
+              : ElevatedButton(
               style: ElevatedButton.styleFrom(
-                  fixedSize: Size(MediaQuery.of(context).size.width * 0.7, 50)),
+                minimumSize: const Size.fromHeight(50.0)),
               onPressed: () {
                   setState(() {
                     resendTime = 60;
@@ -233,11 +231,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               },
               child: Text('Confirm your phone number',
                   style: TextStyle(
-                      fontSize: 16.sp,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w400,
                       color: Colors.white)),
             ),
-          ),
         ],
     );
   }
@@ -366,7 +363,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   }
               ) : null
           ),
-          style: TextStyle(fontSize: 18.sp, color: Colors.white, fontWeight: FontWeight.w300),
+          style: TextStyle(fontSize: 14.sp, color: Colors.white, fontWeight: FontWeight.w300),
           textInputAction: TextInputAction.next,
         ),
         SizedBox(height: 20.h),
@@ -393,38 +390,44 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   }
               ) : null
           ),
-          style: TextStyle(fontSize: 18.sp, color: Colors.white, fontWeight: FontWeight.w300),
+          style: TextStyle(fontSize: 14.sp, color: Colors.white, fontWeight: FontWeight.w300),
         ),
         SizedBox(height: 40.h),
         enableFormThreeButton == false
-            ? Center(
-          child: ElevatedButton(
+            ? ElevatedButton(
             style: ElevatedButton.styleFrom(
-                fixedSize: Size(MediaQuery.of(context).size.width * 0.5, 50),
+                minimumSize: const Size.fromHeight(50.0),
                 disabledBackgroundColor: textFieldColor
             ),
             onPressed: null,
             child: Text('Reset Password',
-                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400, color: Colors.grey)),
-          ),
-        )
-            : Center(
-          child: ElevatedButton(
+                style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400, color: Colors.grey)),
+          )
+            : ElevatedButton(
             style: ElevatedButton.styleFrom(
-                fixedSize: Size(MediaQuery.of(context).size.width * 0.5, 50)
+              minimumSize: const Size.fromHeight(50.0),
             ),
             onPressed: () {
               if (passwordController.text == confirmPasswordController.text) {
-
+                showCongratulationMessage(context, 'Password Reset',
+                    'Your password has been successfully reset. You can now log in to your account using your new password.',
+                    'Login', () {
+                      Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => const LoginScreen()), (_) => false
+                      );
+                    });
               }
               else{
-                showToastMessage('The password you entered does not match');
+                showErrorMessage(context, 'Password Mismatch', 'The passwords you entered do not match. Please double-check the password you entered and try again.',
+                        () {
+                      Navigator.pop(context);
+                    });
               }
             },
             child: Text('Reset Password',
-                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400, color: Colors.white)),
+                style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400, color: Colors.white)),
           ),
-        ),
       ],
     );
   }

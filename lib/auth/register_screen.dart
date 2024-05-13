@@ -10,6 +10,8 @@ import 'package:phone_form_field/phone_form_field.dart';
 import 'package:susubox/utils/utils.dart';
 import 'package:telephony/telephony.dart';
 
+import 'login.dart';
+
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -116,6 +118,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
             showFormFour = false;
             showFormOne = false;
           } else if (showFormFour) {
+            enableFormFourButton = false;
+            pinController.clear();
+            pinConfirmController.clear();
             showFormTwo = false;
             showFormThree = true;
             showFormFour = false;
@@ -147,6 +152,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   showFormFour = false;
                   showFormOne = false;
                 } else if (showFormFour) {
+                  enableFormFourButton = false;
+                  pinController.clear();
+                  pinConfirmController.clear();
                   showFormTwo = false;
                   showFormThree = true;
                   showFormFour = false;
@@ -160,7 +168,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
         body: SingleChildScrollView(
           child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15.w),
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -185,7 +193,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Phone Number',
+          Text('Get Started',
               style: TextStyle(
                   fontSize: 30.sp,
                   fontWeight: FontWeight.w500,
@@ -212,12 +220,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
             isCountrySelectionEnabled: false,
             isCountryButtonPersistent: true,
             countryButtonStyle: CountryButtonStyle(
+              showDropdownIcon: false,
               showDialCode: true,
               showIsoCode: false,
               showFlag: true,
               flagSize: 20.h,
               textStyle: TextStyle(
-                  fontSize: 18.sp,
+                  fontSize: 14.sp,
                   color: Colors.white,
                   fontWeight: FontWeight.w300),
             ),
@@ -229,30 +238,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
               FilteringTextInputFormatter.allow(RegExp('[0-9+]'))
             ],
             style: TextStyle(
-                fontSize: 18.sp,
+                fontSize: 14.sp,
                 color: Colors.white,
                 fontWeight: FontWeight.w300),
           ),
           SizedBox(height: 30.h),
           enableFormOneButton == false
-              ? Center(
-                  child: ElevatedButton(
+              ? ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                        fixedSize:
-                            Size(MediaQuery.of(context).size.width * 0.71, 50),
+                        minimumSize: const Size.fromHeight(50.0),
                         disabledBackgroundColor: textFieldColor),
                     onPressed: null,
-                    child: Text('Confirm your phone number',
+                    child: Text('Verify phone number',
                         style: TextStyle(
-                            fontSize: 16.sp,
+                            fontSize: 14.sp,
                             fontWeight: FontWeight.w400,
                             color: Colors.grey)),
-                  ),
-                )
-              : Center(
-                  child: ElevatedButton(
+                  )
+              : ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                        fixedSize: Size(MediaQuery.of(context).size.width * 0.7, 50)),
+                      minimumSize: const Size.fromHeight(50.0)),
                     onPressed: () {
                       if (key.currentState?.validate() ?? true) {
                         setState(() {
@@ -265,13 +270,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         });
                       }
                     },
-                    child: Text('Confirm your phone number',
+                    child: Text('Verify phone number',
                         style: TextStyle(
-                            fontSize: 16.sp,
+                            fontSize: 14.sp,
                             fontWeight: FontWeight.w400,
                             color: Colors.white)),
-                  ),
                 ),
+          SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text('Already have an account? ',
+                  style: TextStyle(color: Colors.white, fontSize: 13.sp, fontWeight: FontWeight.w400)),
+              GestureDetector(
+                onTap: () {
+                  Route route = MaterialPageRoute(builder: (c) => const LoginScreen());
+                  Navigator.push(context, route);
+                },
+                child: Text(
+                  'Login',
+                  style: TextStyle(color: buttonColor, fontSize: 13.sp),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -358,7 +380,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Send code again',
+            Text('Send new code in',
                 style: TextStyle(
                     color: Colors.white,
                     fontSize: 14.sp,
@@ -368,7 +390,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             Text(
               '00:${strFormatting(resendTime)}',
               style: TextStyle(
-                  fontSize: 14.sp,
+                  fontSize: 13.sp,
                   color: Colors.white,
                   fontWeight: FontWeight.w400),
             ),
@@ -406,7 +428,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Sign Up',
+          Text('Personal Information',
               style: TextStyle(
                   fontSize: 30.sp,
                   fontWeight: FontWeight.w500,
@@ -445,7 +467,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 color: buttonColor,
               )
             ),
-            style: TextStyle(fontSize: 18.sp, color: Colors.white, fontWeight: FontWeight.w300),
+            style: TextStyle(fontSize: 16.sp, color: Colors.white, fontWeight: FontWeight.w300),
             textInputAction: TextInputAction.next,
           ),
           SizedBox(height: MediaQuery.of(context).size.height * 0.03),
@@ -475,7 +497,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   color: buttonColor,
                 )
             ),
-            style: TextStyle(fontSize: 18.sp, color: Colors.white, fontWeight: FontWeight.w300),
+            style: TextStyle(fontSize: 16.sp, color: Colors.white, fontWeight: FontWeight.w300),
             textInputAction: TextInputAction.next,
           ),
           SizedBox(height: MediaQuery.of(context).size.height * 0.03),
@@ -490,7 +512,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   color: buttonColor,
                 )
             ),
-            style: TextStyle(fontSize: 18.sp, color: Colors.white, fontWeight: FontWeight.w300),
+            style: TextStyle(fontSize: 16.sp, color: Colors.white, fontWeight: FontWeight.w300),
             textInputAction: TextInputAction.next,
           ),
           SizedBox(height: MediaQuery.of(context).size.height * 0.03),
@@ -525,7 +547,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ) :
               const Icon(Icons.lock, color: buttonColor)
             ),
-            style: TextStyle(fontSize: 18.sp, color: Colors.white, fontWeight: FontWeight.w300),
+            style: TextStyle(fontSize: 16.sp, color: Colors.white, fontWeight: FontWeight.w300),
           ),
           SizedBox(height: MediaQuery.of(context).size.height * 0.04),
           Row(
@@ -574,21 +596,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
           SizedBox(height: MediaQuery.of(context).size.height * 0.04),
           enableFormThreeButton == false
-              ? Center(
-            child: ElevatedButton(
+              ? ElevatedButton(
               style: ElevatedButton.styleFrom(
-                  fixedSize: Size(MediaQuery.of(context).size.width * 0.55, 50),
+                  minimumSize: const Size.fromHeight(50.0),
                   disabledBackgroundColor: textFieldColor
               ),
               onPressed: null,
               child: Text('Create Account',
-                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400, color: Colors.grey)),
-            ),
-          )
-              : Center(
-            child: ElevatedButton(
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400, color: Colors.grey)),
+          ) : ElevatedButton(
               style: ElevatedButton.styleFrom(
-                  fixedSize: Size(MediaQuery.of(context).size.width * 0.55, 50)
+                minimumSize: const Size.fromHeight(50.0),
               ),
               onPressed: () {
                 if (key2.currentState?.validate() ?? true) {
@@ -605,9 +623,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 }
               },
               child: Text('Create Account',
-                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400, color: Colors.white)),
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400, color: Colors.white)),
             ),
-          ),
         ],
       ),
     );
@@ -689,7 +706,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             });
           },
           obscureText: pinVisible,
-          obscuringCharacter: '●',
+          obscuringCharacter: '\u{25CF}',
           decoration: InputDecoration(
               hintText: 'Confirm Pin',
               suffixIcon: pinConfirmController.text.length == 4
@@ -710,33 +727,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
         SizedBox(height: 30.h),
         enableFormFourButton == false
-            ? Center(
-          child: ElevatedButton(
+            ? ElevatedButton(
             style: ElevatedButton.styleFrom(
-                fixedSize: Size(MediaQuery.of(context).size.width * 0.45, 50),
+                minimumSize: const Size.fromHeight(50.0),
                 disabledBackgroundColor: textFieldColor
             ),
             onPressed: null,
             child: Text('Create PIN',
-                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400, color: Colors.grey)),
-          ),
+                style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400, color: Colors.grey)),
         )
-            : Center(
-          child: ElevatedButton(
+            : ElevatedButton(
             style: ElevatedButton.styleFrom(
-                fixedSize: Size(MediaQuery.of(context).size.width * 0.45, 50)
+                minimumSize: const Size.fromHeight(50.0)
             ),
             onPressed: () {
               if (pinController.text == pinConfirmController.text) {
-                  showToastMessage('Pin match');
+                  showCongratulationMessage(context, 'Congratulations!',
+                      'Welcome! You have successfully subscribed to SusuBox. Enjoy the full convenience and safety of your susu savings, loans, investment, insurance and pensions.',
+                      'Login', () {
+                        Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(builder: (context) => const LoginScreen()), (_) => false
+                        );
+                      });
               }
               else{
-                showToastMessage('Pin does not match');
+                showErrorMessage(context, 'Pin Mismatch', 'The PIN you entered do not match. Please double-check the PIN you entered and try again.',
+                        () {
+                  Navigator.pop(context);
+                });
               }
             },
             child: Text('Create PIN',
-                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400, color: Colors.white)),
-          ),
+                style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400, color: Colors.white)),
         ),
       ],
     );

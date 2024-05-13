@@ -32,8 +32,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
+    return Scaffold(
+      backgroundColor: buttonColor,
         body: Padding(
           padding: EdgeInsets.only(left: 15.w),
           child: Column(
@@ -43,8 +43,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 itemCount: 3,
                 options: CarouselOptions(
                   enableInfiniteScroll: false,
-                  height: MediaQuery.of(context).size.height * 0.62,
-                  viewportFraction: 0.9,
+                  height: MediaQuery.of(context).size.height * 0.6,
+                  viewportFraction: 1.0,
                   onPageChanged: (index, reason) {
                     setState(() {
                       _currentPage = index;
@@ -53,25 +53,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 ),
                 itemBuilder: (context, index, realIndex) {
                   Color containerColor = buttonColor;
-                  String text = 'Save money\nfor your\ndreams';
+                  String text = 'Save money\n   for your\n    dreams';
                   if (index == 1) {
                     containerColor = Colors.blue;
-                    text = 'Get analysis\nof your\nexpenses';
+                    text = 'Get analysis\n   of your\n   expenses';
                   } else if (index == 2) {
                     containerColor = Colors.purple;
                   }
-                  return Container(
-                    alignment: Alignment.bottomLeft,
-                    margin: EdgeInsets.only(right: 10.w),
-                    width: MediaQuery.of(context).size.width * 0.85,
-                    padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 15.w),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: containerColor,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.end,
+                  return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           RichText(
                             text: TextSpan(
@@ -83,49 +73,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                               ],
                             ),
                           ),
-                          SizedBox(height: 15.h),
+                          SizedBox(height: MediaQuery.of(context).size.height * 0.07),
                           Text('Description goes here',
                             style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.w300),
                           ),
-                          SizedBox(height: MediaQuery.of(context).size.height * 0.07),
-                          Row(
-                            children: [
-                              Container(
-                                width: 50.w,
-                                height: 50.h,
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white,
-                                ),
-                                child: IconButton(
-                                  icon: const Icon(Icons.arrow_back),
-                                  onPressed: () {
-
-                                  },
-                                  color: Colors.black,
-                                ),
-                              ),
-                              SizedBox(width: 15.w),
-                              Container(
-                                width: 50.w,
-                                height: 50.h,
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white,
-                                ),
-                                child: IconButton(
-                                  icon: const Icon(Icons.arrow_forward),
-                                  onPressed: () {
-
-                                  },
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 15.h)
                         ],
-                    ),
                   );
                 },
               ),
@@ -137,33 +89,30 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               SizedBox(height: 20.h),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                    fixedSize: Size(MediaQuery.of(context).size.width * 0.6, 50)
+                    backgroundColor: blackFaded,
+                    fixedSize: Size(MediaQuery.of(context).size.width * 0.8, 50)
                 ),
                 onPressed: () {
                   Navigator.push(context,
                     MaterialPageRoute(builder: (context) => const RegisterScreen()),
                   );
                 },
-                child: Text('Get started for free',
-                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400, color: Colors.white)),
+                child: Text('CREATE ACCOUNT',
+                    style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w400, color: Colors.white)),
               ),
               SizedBox(height: 15.h),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    fixedSize: Size(MediaQuery.of(context).size.width * 0.6, 50)
-                ),
+              TextButton(
                 onPressed: () {
                   Navigator.push(context,
                       MaterialPageRoute(builder: (context) => const LoginScreen()),
                   );
                 },
-                child: Text('Login here',
-                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400, color: Colors.white)),
+                child: Text('LOGIN NOW',
+                    style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w400, color: Colors.white)),
               ),
             ],
           ),
         ),
-      ),
     );
   }
 
@@ -172,12 +121,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     for (int i = 0; i < 3; i++) {
       indicators.add(
         Container(
-          width: 10.w,
-          height: 10.h,
+          width: _currentPage == i ? 13.w : 7.w,
+          height: _currentPage == i ? 13.h : 7.h,
           margin: const EdgeInsets.symmetric(horizontal: 5),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: _currentPage == i ? buttonColor : Colors.white,
+            color: _currentPage == i ? Colors.white : Colors.white,
           ),
         ),
       );
