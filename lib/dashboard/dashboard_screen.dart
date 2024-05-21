@@ -29,36 +29,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
           SettingsScreen()
         ],
       ),
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
-        child: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-             backgroundColor: bottomAppBarColor,
-            currentIndex: selectedIndex,
-            selectedItemColor: buttonColor,
-            unselectedItemColor: Colors.grey,
-            onTap: (index) {
-              setState(() {
-                selectedIndex = index;
-                pageController.jumpToPage(index);
-              });
-            },
-            items: [
-
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home_filled, size: 15.h,),
-                label: 'Home',
+      bottomNavigationBar: ClipRRect(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.08,
+          child: BottomNavigationBar(
+                type: BottomNavigationBarType.fixed,
+                 backgroundColor: bottomAppBarColor,
+                currentIndex: selectedIndex,
+                selectedItemColor: buttonColor,
+                unselectedItemColor: Colors.white,
+                onTap: (index) {
+                  setState(() {
+                    selectedIndex = index;
+                    pageController.jumpToPage(index);
+                  });
+                },
+                items: [
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.home_filled, size: 15.h,),
+                    label: 'Home',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.account_balance_wallet, size: 15.h),
+                    label: 'Susu',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.settings, size: 15.h),
+                    label: 'Settings',
+                  ),
+                ],
               ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.crop_square, size: 15.h),
-                label: 'Susu',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.settings, size: 15.h),
-                label: 'Settings',
-              ),
-            ],
-          ),
+        ),
       ),
     );
   }

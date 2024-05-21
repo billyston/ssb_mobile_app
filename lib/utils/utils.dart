@@ -43,7 +43,7 @@ void showErrorMessage(BuildContext context, String title, String message, VoidCa
     barrierDismissible: false,
     builder: (BuildContext context) {
       return AlertDialog(
-        insetPadding: EdgeInsets.symmetric(vertical: MediaQuery.of(context).size.height * 0.33, horizontal: 20.w),
+        insetPadding: EdgeInsets.symmetric(vertical: MediaQuery.of(context).size.height * 0.1, horizontal: 20.w),
         backgroundColor: blackFaded,
         content: Container(
           padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 10.w),
@@ -51,6 +51,7 @@ void showErrorMessage(BuildContext context, String title, String message, VoidCa
             borderRadius: BorderRadius.circular(10),
           ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(title,
                   style: TextStyle(fontSize: 22.sp, color: Colors.white, fontWeight: FontWeight.w600)
@@ -78,13 +79,65 @@ void showErrorMessage(BuildContext context, String title, String message, VoidCa
   );
 }
 
+void showOptionsDialog(BuildContext context, String title, String message, String button1, String button2, VoidCallback button1Tapped, VoidCallback button2Tapped) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        insetPadding: EdgeInsets.symmetric(vertical: MediaQuery.of(context).size.height * 0.1, horizontal: 20.w),
+        backgroundColor: blackFaded,
+        content: Container(
+          padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 10.w),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                title,
+                style: TextStyle(fontSize: 22.sp, color: Colors.white, fontWeight: FontWeight.w600),
+              ),
+              SizedBox(height: 10.h),
+              Text(
+                message,
+                style: TextStyle(fontSize: 13.sp, color: Colors.white, fontWeight: FontWeight.w400),
+              ),
+              SizedBox(height: 15.h),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(50),
+                ),
+                onPressed: button1Tapped,
+                child: Text(
+                  button1,
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400, color: Colors.white),
+                ),
+              ),
+              SizedBox(height: 10.h),
+              TextButton(
+                onPressed: button2Tapped,
+                child: Text(
+                  button2,
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400, color: buttonColor),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
 void showCongratulationMessage(BuildContext context, String title, String message, String buttonLabel, VoidCallback buttonTapped) {
   showDialog(
     context: context,
     barrierDismissible: false,
     builder: (BuildContext context) {
       return AlertDialog(
-        insetPadding: EdgeInsets.symmetric(vertical: MediaQuery.of(context).size.height * 0.32, horizontal: 20.w),
+        insetPadding: EdgeInsets.symmetric(vertical: MediaQuery.of(context).size.height * 0.1, horizontal: 20.w),
         backgroundColor: blackFaded,
         content: Container(
           padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 10.w),
@@ -92,6 +145,7 @@ void showCongratulationMessage(BuildContext context, String title, String messag
             borderRadius: BorderRadius.circular(10),
           ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(title,
                   style: TextStyle(fontSize: 22.sp, color: Colors.white, fontWeight: FontWeight.w600)

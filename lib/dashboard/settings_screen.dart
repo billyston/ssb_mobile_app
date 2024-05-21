@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:susubox/screens/account_screen.dart';
 import 'package:susubox/utils/utils.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -50,6 +51,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 title: Text('Account',
                   style: TextStyle(color: Colors.white, fontSize:14.sp, fontWeight: FontWeight.w400),
                 ),
+                onTap: (){
+                  Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => const AccountScreen()),
+                  );
+                },
               ),
               ListTile(
                 leading: const Icon(

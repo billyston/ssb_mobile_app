@@ -42,6 +42,7 @@ dependencies:
   carousel_slider: ^4.2.1
   telephony: ^0.2.0
   fluttertoast: ^8.0.8
+  intl: ^0.18.1
 
 dev_dependencies:
   flutter_test:
@@ -75,6 +76,8 @@ flutter:
     - assets/images/coins_bg.png
     - assets/images/personal_susu_bg.jpg
     - assets/images/biz_susu_bg.jpg
+    - assets/images/profile.jpg
+    - assets/images/advert.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
