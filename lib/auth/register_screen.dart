@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,10 +8,13 @@ import 'package:otp_text_field/otp_field.dart';
 import 'package:otp_text_field/otp_field_style.dart';
 import 'package:otp_text_field/style.dart';
 import 'package:phone_form_field/phone_form_field.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:susubox/utils/utils.dart';
 import 'package:telephony/telephony.dart';
 
-import 'login.dart';
+import '../ApiService/api_service.dart';
+import 'continue_registration_ussd.dart';
+import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -50,7 +54,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController pinController = TextEditingController();
   final TextEditingController pinConfirmController = TextEditingController();
   OtpFieldController otp = OtpFieldController();
+  String otpCode = '';
 
+  String resourceId = '';
   @override
   void initState() {
     super.initState();
@@ -62,7 +68,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         String sms = message.body.toString();
 
         if (message.body!.contains('Your Susubox verification code is')) {
-          String otpCode = sms.replaceAll(RegExp(r'[^0-9]'), '');
+          String otpCode = sms.replaceAll(RegExp(r'\D'), '');
           otp.set(otpCode.split(""));
 
           setState(() {});
@@ -211,7 +217,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             onChanged: (phoneNumber) {
               print('changed into $phoneNumber');
               phoneController.text = '+${phoneNumber.countryCode}${phoneNumber.nsn}';
-              print('Phone number $phoneController');
+              print('Phone number ${phoneController.text.replaceFirst('+233', '0')}');
               setState(() {
                 enableFormOneButton = phoneController.text.length == 13;
               });
@@ -260,14 +266,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       minimumSize: const Size.fromHeight(50.0)),
                     onPressed: () {
                       if (key.currentState?.validate() ?? true) {
-                        setState(() {
-                          resendTime = 60;
-                          startTimer();
-                          showFormTwo = true;
-                          showFormThree = false;
-                          showFormFour = false;
-                          showFormOne = false;
-                        });
+                        verifyPhoneNumber();
                       }
                     },
                     child: Text('Verify phone number',
@@ -368,12 +367,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
           spaceBetween: 10,
           fieldStyle: FieldStyle.box,
           keyboardType: TextInputType.number,
+          onChanged: (val) {
+
+          },
           onCompleted: (pin) {
-            pin = otp.toString();
-            showFormTwo = false;
-            showFormThree = true;
-            showFormFour = false;
-            showFormOne = false;
+            otpCode = pin;
+            verifyOTP();
           },
         ),
         SizedBox(height: 20.h),
@@ -399,8 +398,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         resendTime == 0
             ? TextButton(
                 onPressed: () {
-                  resendTime = 60;
-                  startTimer();
+                  resendOTP();
                 },
                 child: Text(
                   'Resend',
@@ -455,7 +453,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             },
             onChanged: (value) {
               setState(() {
-                enableFormThreeButton = firstNameController.text.length > 1 && lastNameController.text.length > 1 && passwordController.text.length > 5;
+                enableFormThreeButton = firstNameController.text.length > 1 && lastNameController.text.length > 1 && passwordController.text.length > 2;
               });
             },
             decoration: InputDecoration(
@@ -485,7 +483,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             },
             onChanged: (value) {
               setState(() {
-                enableFormThreeButton = firstNameController.text.length > 1 && lastNameController.text.length > 1 && passwordController.text.length > 5;
+                enableFormThreeButton = firstNameController.text.length > 1 && lastNameController.text.length > 1 && passwordController.text.length > 2;
               });
             },
             decoration: InputDecoration(
@@ -528,12 +526,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
             obscureText: passwordVisible,
             onChanged: (value) {
               setState(() {
-                enableFormThreeButton = firstNameController.text.length > 1 && lastNameController.text.length > 1 && passwordController.text.length > 5;
+                enableFormThreeButton = firstNameController.text.length > 1 && lastNameController.text.length > 1 && passwordController.text.length > 2;
               });
             },
             decoration: InputDecoration(
               hintText: 'Password',
-              suffixIcon: passwordController.text.length > 5
+              suffixIcon: passwordController.text.length > 2
               ? IconButton(
                   icon: Icon(passwordVisible ? Icons.visibility : Icons.visibility_off),
                   color: buttonColor,
@@ -613,12 +611,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   if (!isChecked) {
                     showToastMessage('Please accept terms and conditions');
                   } else {
-                    setState(() {
-                      showFormTwo = false;
-                      showFormThree = false;
-                      showFormFour = true;
-                      showFormOne = false;
-                    });
+                    print('Email ${emailController.text.toString()}');
+                    createUserProfile();
                   }
                 }
               },
@@ -742,14 +736,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             onPressed: () {
               if (pinController.text == pinConfirmController.text) {
-                  showCongratulationMessage(context, 'Congratulations!',
-                      'Welcome! You have successfully subscribed to SusuBox. Enjoy the full convenience and safety of your susu savings, loans, investment, insurance and pensions.',
-                      'Login', () {
-                        Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(builder: (context) => const LoginScreen()), (_) => false
-                        );
-                      });
+                 createPin();
               }
               else{
                 showErrorMessage(context, 'Pin Mismatch', 'The PIN you entered do not match. Please double-check the PIN you entered and try again.',
@@ -764,4 +751,232 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ],
     );
   }
+
+  void verifyPhoneNumber() async{
+    showLoadingDialog(context);
+    try {
+      final response = await ApiService().verifyPhoneNumber(phoneController.text.replaceFirst('+233', '0'))
+          .timeout(const Duration(seconds: 40));
+      final responseData = jsonDecode(response.body);
+
+      print('Response Body $responseData');
+      if(mounted){
+        if(response.statusCode == 200 && responseData['code'] == 200) {
+          resourceId = responseData['data']['attributes']['resource_id'];
+          setState(() {
+            resendTime = 60;
+            startTimer();
+            showFormTwo = true;
+            showFormThree = false;
+            showFormFour = false;
+            showFormOne = false;
+          });
+          dismissDialog(context);
+        }
+        else if(response.statusCode == 200 && responseData['code'] == 422){
+          dismissDialog(context);
+          showErrorMessage(context, 'Oops', 'The phone number you entered is already registered with us. '
+              'You cannot register again using the same phone number.',
+                  () {
+                Navigator.pop(context);
+              });
+        }
+        else if(response.statusCode == 200 && responseData['code'] == 206){
+          dismissDialog(context);
+          showCongratulationMessage(context, 'Incomplete Registration', 'You have not created an email/password for this account.',
+              'Complete Registration',
+                  () {
+            Navigator.pop(context);
+                Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const RegisterUserUssd()),
+                );
+              });
+          final prefs = await SharedPreferences.getInstance();
+          prefs.setString('resourceId', responseData['data']['attributes']['resource_id']);
+        }
+        else{
+          showToastMessage(responseData['errors'].toString());
+          dismissDialog(context);
+        }
+      }
+
+    } catch (e) {
+      if(mounted){
+        print('Connection Error $e');
+        dismissDialog(context);
+        showErrorMessage(context, 'Oops', 'An unexpected error occurred',
+                () {
+              Navigator.pop(context);
+            });
+      }
+    }
+  }
+
+  void resendOTP() async{
+    showLoadingDialog(context);
+    try {
+      final response = await ApiService().sendOTP(phoneController.text.replaceFirst('+233', '0'))
+          .timeout(const Duration(seconds: 40));
+      final responseData = jsonDecode(response.body);
+
+      print('Response Body $responseData');
+      if(mounted){
+        if(response.statusCode == 200 && responseData['code'] == 202){
+          otp.clear();
+          resendTime = 60;
+          startTimer();
+          dismissDialog(context);
+        }
+        else if(response.statusCode == 200 && responseData['code'] == 422){
+          setState(() {
+            showFormTwo = false;
+            showFormThree = true;
+            showFormFour = false;
+            showFormOne = false;
+          });
+          dismissDialog(context);
+        }
+        else {
+          showToastMessage('OTP sending failed, Please try again');
+          dismissDialog(context);
+        }
+      }
+    } catch (e) {
+      if(mounted){
+        print('Connection Error $e');
+        dismissDialog(context);
+        showErrorMessage(context, 'Oops', 'An unexpected error occurred',
+                () {
+              Navigator.pop(context);
+            });
+      }
+    }
+  }
+
+  void verifyOTP() async{
+    showLoadingDialog(context);
+    try {
+      final response = await ApiService().verifyOTP(otpCode, resourceId)
+          .timeout(const Duration(seconds: 40));
+      final responseData = jsonDecode(response.body);
+
+      print('Response Body $responseData');
+      if(mounted){
+        if(response.statusCode == 200 && responseData['code'] == 200){
+          setState(() {
+            showFormTwo = false;
+            showFormThree = true;
+            showFormFour = false;
+            showFormOne = false;
+          });
+          dismissDialog(context);
+        }
+        else {
+          dismissDialog(context);
+          showErrorMessage(context, 'Oops', 'The OTP you entered is incorrect. Please enter a valid OTP code.',
+                  () {
+                Navigator.pop(context);
+              });
+        }
+      }
+
+    } catch (e) {
+      if(mounted){
+        print('Connection Error $e');
+        dismissDialog(context);
+        showErrorMessage(context, 'Oops', 'An unexpected error occurred',
+                () {
+              Navigator.pop(context);
+            });
+      }
+    }
+  }
+
+  void createUserProfile() async {
+    showLoadingDialog(context);
+    try {
+      final response = await ApiService().createUserInfo(
+          firstNameController.text.trim(),
+          lastNameController.text.trim(),
+          emailController.text.trim(),
+          passwordController.text.trim(),
+          resourceId)
+          .timeout(const Duration(seconds: 40));
+      final responseData = jsonDecode(response.body);
+
+      print('Response Body $responseData');
+      if(mounted) {
+        if (response.statusCode == 200 && responseData['code'] == 200) {
+          setState(() {
+            showFormTwo = false;
+            showFormThree = false;
+            showFormFour = true;
+            showFormOne = false;
+          });
+          dismissDialog(context);
+        }
+        else {
+          dismissDialog(context);
+          showErrorMessage(context, 'Oops', responseData['errors'].toString(),
+                  () {
+                Navigator.pop(context);
+              });
+        }
+      }
+    } catch (e) {
+      if(mounted){
+        print('Connection Error $e');
+        dismissDialog(context);
+        showErrorMessage(context, 'Oops', 'An unexpected error occurred',
+                () {
+              Navigator.pop(context);
+            });
+      }
+    }
+  }
+
+  void createPin() async {
+    showLoadingDialog(context);
+    try {
+      final response = await ApiService().createPin(
+          pinController.text.trim(),
+          pinConfirmController.text.trim(),
+          resourceId)
+          .timeout(const Duration(seconds: 40));
+      final responseData = jsonDecode(response.body);
+
+      print('Response Body $responseData');
+      print('Resource Id $resourceId');
+      if(mounted){
+        if (response.statusCode == 200 && responseData['code'] == 200) {
+          dismissDialog(context);
+          showCongratulationMessage(context, 'Congratulations!',
+              'Welcome! You have successfully subscribed to SusuBox. Enjoy the full convenience and safety of your susu savings, loans, investment, insurance and pensions.',
+              'Login', () {
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginScreen()), (_) => false
+                );
+              });
+        }
+        else {
+          dismissDialog(context);
+          showErrorMessage(context, 'Oops', 'Unable to create pin at this moment, Please try again.',
+                  () {
+                Navigator.pop(context);
+              });
+        }
+      }
+    } catch (e) {
+      if(mounted){
+        print('Connection Error $e');
+        dismissDialog(context);
+        showErrorMessage(context, 'Oops', 'An unexpected error occurred',
+                () {
+              Navigator.pop(context);
+            });
+      }
+    }
+  }
+
 }

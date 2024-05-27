@@ -1,18 +1,20 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:phone_form_field/phone_form_field.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:susubox/auth/continue_registration_ussd.dart';
+import 'package:susubox/auth/create_susu_pin.dart';
 import 'package:susubox/auth/register_screen.dart';
-import 'package:susubox/auth/reset_password.dart';
+import 'package:susubox/auth/reset_password_screen.dart';
 import 'package:susubox/dashboard/dashboard_screen.dart';
 import 'package:susubox/dashboard/home_screen.dart';
 import 'package:susubox/utils/utils.dart';
 
-/*
-  invalid number or password /
-  continue registration from ussd /
-  Your account has been suspended for further investigations. Please contact customer support for further assistance
-*/
+import '../ApiService/api_service.dart';
+import '../model/linked_accounts.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -29,6 +31,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool passwordVisible = true;
   bool enableButton = false;
+
+  LinkedAccounts? linkedAccounts;
 
   @override
   Widget build(BuildContext context) {
@@ -105,12 +109,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   obscureText: passwordVisible,
                   onChanged: (value) {
                     setState(() {
-                      enableButton = phoneController.text.length == 13 && passwordController.text.length > 5;
+                      enableButton = phoneController.text.length == 13 && passwordController.text.length > 2;
                     });
                   },
                   decoration: InputDecoration(
                     hintText: 'Password',
-                    suffixIcon: passwordController.text.length > 5
+                    suffixIcon: passwordController.text.length > 2
                         ? IconButton(
                       icon: Icon(
                         passwordVisible ? Icons.visibility : Icons.visibility_off,
@@ -158,9 +162,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     onPressed: () {
                        if (key.currentState?.validate() ?? true) {
-                          Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => const DashboardScreen()),
-                         );
+                          login();
                        }
                     },
                     child: Text('Login',
@@ -174,4 +176,90 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+
+  void login() async {
+    showLoadingDialog(context);
+    try {
+      final response = await ApiService().customerLogin(
+          phoneController.text.replaceFirst('+233', '0'),
+          passwordController.text.trim())
+          .timeout(const Duration(seconds: 40));
+      final responseData = jsonDecode(response.body);
+
+      print('Response Body $responseData');
+      if(mounted){
+        if (response.statusCode == 200 && responseData['code'] == 200) {
+          dismissDialog(context);
+          Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const DashboardScreen()),
+          );
+          final prefs = await SharedPreferences.getInstance();
+          prefs.setString('token', responseData['token']['access_token']);
+          prefs.setString('resourceId', responseData['data']['attributes']['resource_id']);
+          prefs.setString('firstName', responseData['data']['attributes']['first_name']);
+          prefs.setString('lastName', responseData['data']['attributes']['last_name']);
+        }
+        else if (response.statusCode == 200 && responseData['code'] == 401) {
+          dismissDialog(context);
+          showOptionsDialog(context, 'Oops', 'The phone number or password you entered is incorrect. Please try again.',
+              'Forgot Password', 'Try again',
+                  () {
+                Navigator.pop(context);
+                Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const ResetPasswordScreen()),
+                );
+              }, () {
+                Navigator.pop(context);
+              });
+        }
+        else if(response.statusCode == 200 && responseData['code'] == 422) {
+          dismissDialog(context);
+          showErrorMessage(context, 'Oops', 'The phone number you entered is not registered with us, Please enter a phone number registered with us.',
+                  () {
+                Navigator.pop(context);
+              });
+        }
+        else if(response.statusCode == 200 && responseData['code'] == 206 && responseData['data']['attributes']['pin_setup'] == false){
+          dismissDialog(context);
+          showCongratulationMessage(context, 'Incomplete Registration', 'You have not created your Susubox pin.',
+              'Complete Registration',
+                  () {
+                Navigator.pop(context);
+                Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const CreateSusuBoxPin()),
+                );
+              });
+          final prefs = await SharedPreferences.getInstance();
+          prefs.setString('resourceId', responseData['data']['attributes']['resource_id']);
+        }
+        else if(response.statusCode == 200 && responseData['code'] == 206){
+          dismissDialog(context);
+          showCongratulationMessage(context, 'Incomplete Registration', 'You have not created an email/password for this account.',
+                  'Complete Registration',
+                  () {
+                    Navigator.pop(context);
+                    Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => const RegisterUserUssd()),
+                    );
+              });
+          final prefs = await SharedPreferences.getInstance();
+          prefs.setString('resourceId', responseData['data']['attributes']['resource_id']);
+        }
+        else{
+          showToastMessage(responseData['errors'].toString());
+          dismissDialog(context);
+        }
+      }
+    } catch (e) {
+      if(mounted){
+        print('Connection Error $e');
+        dismissDialog(context);
+        showErrorMessage(context, 'Oops', 'An unexpected error occurred',
+                () {
+              Navigator.pop(context);
+            });
+      }
+    }
+  }
+
 }

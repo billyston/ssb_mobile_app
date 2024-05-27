@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../ApiService/api_service.dart';
 import '../utils/utils.dart';
-import 'login.dart';
+import 'login_screen.dart';
 
 class RegisterUserUssd extends StatefulWidget {
   const RegisterUserUssd({super.key});
@@ -20,6 +24,21 @@ class _RegisterUserUssdState extends State<RegisterUserUssd> {
   bool isChecked = false;
   bool enableButton = false;
   bool passwordVisible = true;
+
+  String resourceId = '';
+
+  void getData() async{
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      resourceId = (prefs.getString('resourceId') ?? '0');
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,11 +96,11 @@ class _RegisterUserUssdState extends State<RegisterUserUssd> {
                   obscureText: passwordVisible,
                   onChanged: (value) {
                     setState(() {
-                      enableButton = emailController.text.contains('@') && passwordController.text.length > 5;});
+                      enableButton = passwordController.text.length > 2;});
                   },
                   decoration: InputDecoration(
                       hintText: 'Password',
-                      suffixIcon: passwordController.text.length > 5
+                      suffixIcon: passwordController.text.length > 2
                           ? IconButton(
                           icon: Icon(passwordVisible ? Icons.visibility : Icons.visibility_off),
                           color: buttonColor,
@@ -97,51 +116,6 @@ class _RegisterUserUssdState extends State<RegisterUserUssd> {
                   ),
                   style: TextStyle(fontSize: 16.sp, color: Colors.white, fontWeight: FontWeight.w300),
                 ),
-               /* SizedBox(height: MediaQuery.of(context).size.height * 0.04),
-                Row(
-                  children: [
-                    Checkbox(
-                      value: isChecked,
-                      activeColor: buttonColor,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          isChecked = value!;
-                        });
-                      },
-                    ),
-                    Text(
-                      'By checking the box you agree to our',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w400),
-                    ),
-                    GestureDetector(
-                      onTap: () {},
-                      child: Text(
-                        ' Terms ',
-                        style: TextStyle(
-                            color: buttonColor,
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.w400),
-                      ),
-                    ),
-                    Text(
-                      'and',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w400),
-                    ),
-                    Text(
-                      ' Conditions',
-                      style: TextStyle(
-                          color: buttonColor,
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w400),
-                    ),
-                  ],
-                ), */
                 SizedBox(height: MediaQuery.of(context).size.height * 0.05),
                 enableButton == false
                     ? ElevatedButton(
@@ -158,20 +132,7 @@ class _RegisterUserUssdState extends State<RegisterUserUssd> {
                         minimumSize: const Size.fromHeight(50)
                     ),
                     onPressed: () {
-                      showCongratulationMessage(context, 'Congratulations!',
-                          'Welcome! You have successfully subscribed to SusuBox. Enjoy the full convenience and safety of your susu savings, loans, investment, insurance and pensions.',
-                          'Login', () {
-                            Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(builder: (context) => const LoginScreen()), (_) => false
-                            );
-                          });
-                     // if (!isChecked) {
-                       // showToastMessage('Please accept terms and conditions');
-                     // }
-                     // else{
-
-                     // }
+                      register();
                     },
                     child: Text('Finish',
                         style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400, color: Colors.white)),
@@ -183,4 +144,46 @@ class _RegisterUserUssdState extends State<RegisterUserUssd> {
       ),
     );
   }
+
+  void register() async{
+    showLoadingDialog(context);
+
+    try {
+      final response = await ApiService().createEmailAndPassword(emailController.text.trim(), passwordController.text.trim(), resourceId)
+          .timeout(const Duration(seconds: 40));
+      final responseData = jsonDecode(response.body);
+
+      print('Response Body $responseData');
+      if(mounted){
+        if(response.statusCode == 200 && responseData['code'] == 200){
+          dismissDialog(context);
+          showCongratulationMessage(context, 'Congratulations!',
+              'Welcome! You have successfully subscribed to SusuBox. Enjoy the full convenience and safety of your susu savings, loans, investment, insurance and pensions.',
+              'Login', () {
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginScreen()), (_) => false
+                );
+              });
+        }
+        else {
+          dismissDialog(context);
+          showErrorMessage(context, 'Oops', responseData['errors'].toString(),
+                  () {
+                Navigator.pop(context);
+              });
+        }
+      }
+    } catch (e) {
+      if(mounted){
+        print('Connection Error $e');
+        dismissDialog(context);
+        showErrorMessage(context, 'Oops', 'An unexpected error occurred',
+                () {
+              Navigator.pop(context);
+            });
+      }
+    }
+  }
+
 }

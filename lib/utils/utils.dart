@@ -11,7 +11,7 @@ const bottomAppBarColor = Color(0xFF1A1919);
 void showToastMessage(String message) {
   Fluttertoast.showToast(
     msg: message,
-    toastLength: Toast.LENGTH_SHORT,
+    toastLength: Toast.LENGTH_LONG,
   );
 }
 
@@ -19,19 +19,25 @@ void showLoadingDialog(BuildContext context){
   showDialog(
       context: context,
       builder: (BuildContext context){
-        return Container(
-          height: 20,
-          width: 20,
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
-            image: const DecorationImage(
-                image: AssetImage('assets/loadingDialog.gif'),
-              fit: BoxFit.scaleDown
-            )
-          ),
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              height: 150.h,
+              width: 150.w,
+              decoration: const BoxDecoration(
+                color: Colors.transparent,
+                image: DecorationImage(
+                    image: AssetImage('assets/loadingDialog.gif'),
+                  fit: BoxFit.cover
+                )
+              ),
+            ),
+          ],
         );
     });
 }
+
 
 void dismissDialog(BuildContext context){
   Navigator.pop(context);

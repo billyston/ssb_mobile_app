@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,8 +10,9 @@ import 'package:otp_text_field/style.dart';
 import 'package:phone_form_field/phone_form_field.dart';
 import 'package:telephony/telephony.dart';
 
+import '../ApiService/api_service.dart';
 import '../utils/utils.dart';
-import 'login.dart';
+import 'login_screen.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key});
@@ -38,6 +40,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
   OtpFieldController otp = OtpFieldController();
+  String otpCode = '';
+  String resourceId = '';
 
   @override
   void initState() {
@@ -49,8 +53,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
         String sms = message.body.toString();
 
-        if (message.body!.contains('Your Susubox verification code is')) {
-          String otpCode = sms.replaceAll(RegExp(r'[^0-9]'), '');
+        if (message.body!.contains('Your password reset verification token is:')) {
+          String otpCode = sms.replaceAll(RegExp(r'\D'), '');
           otp.set(otpCode.split(""));
 
           setState(() {});
@@ -221,13 +225,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size.fromHeight(50.0)),
               onPressed: () {
-                  setState(() {
-                    resendTime = 60;
-                    startTimer();
-                    showFormTwo = true;
-                    showFormThree = false;
-                    showFormOne = false;
-                  });
+                 verifyPhoneNumber();
               },
               child: Text('Confirm your phone number',
                   style: TextStyle(
@@ -277,11 +275,12 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           spaceBetween: 10,
           fieldStyle: FieldStyle.box,
           keyboardType: TextInputType.number,
+          onChanged: (val){
+
+          },
           onCompleted: (pin) {
-            pin = otp.toString();
-            showFormTwo = false;
-            showFormThree = true;
-            showFormOne = false;
+            otpCode = pin;
+            verifyOTP();
           },
         ),
         SizedBox(height: 20.h),
@@ -344,13 +343,13 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           controller: passwordController,
           onChanged: (value) {
             setState(() {
-              enableFormThreeButton = passwordController.text.length > 5 && confirmPasswordController.text.length > 5;
+              enableFormThreeButton = passwordController.text.length > 2 && confirmPasswordController.text.length > 2;
             });
           },
           obscureText: passwordVisible,
           decoration: InputDecoration(
               hintText: 'Enter password',
-              suffixIcon: passwordController.text.length > 4
+              suffixIcon: passwordController.text.length > 2
                   ? IconButton(
                   icon: Icon(passwordVisible ? Icons.visibility : Icons.visibility_off),
                   color: buttonColor,
@@ -371,13 +370,13 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           controller: confirmPasswordController,
           onChanged: (value) {
             setState(() {
-              enableFormThreeButton = passwordController.text.length > 5 && confirmPasswordController.text.length > 5;
+              enableFormThreeButton = passwordController.text.length > 2 && confirmPasswordController.text.length > 2;
             });
           },
           obscureText: passwordVisible,
           decoration: InputDecoration(
               hintText: 'Confirm Password',
-              suffixIcon: confirmPasswordController.text.length > 5
+              suffixIcon: confirmPasswordController.text.length > 2
                   ? IconButton(
                   icon: Icon(passwordVisible ? Icons.visibility : Icons.visibility_off),
                   color: buttonColor,
@@ -409,14 +408,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             ),
             onPressed: () {
               if (passwordController.text == confirmPasswordController.text) {
-                showCongratulationMessage(context, 'Password Reset',
-                    'Your password has been successfully reset. You can now log in to your account using your new password.',
-                    'Login', () {
-                      Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (context) => const LoginScreen()), (_) => false
-                      );
-                    });
+                  createPassword();
               }
               else{
                 showErrorMessage(context, 'Password Mismatch', 'The passwords you entered do not match. Please double-check the password you entered and try again.',
@@ -430,6 +422,125 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           ),
       ],
     );
+  }
+
+  void verifyPhoneNumber() async{
+    showLoadingDialog(context);
+
+    try {
+      final response = await ApiService().verifyNumberPasswordReset(phoneController.text.replaceFirst('+233', '0'))
+          .timeout(const Duration(seconds: 40));
+      final responseData = jsonDecode(response.body);
+
+      print('Response Body $responseData');
+      if(mounted){
+        if((response.statusCode == 200 && responseData['code'] == 202)){
+          resourceId = responseData['data']['attributes']['resource_id'];
+          setState(() {
+            resendTime = 60;
+            startTimer();
+            showFormTwo = true;
+            showFormThree = false;
+            showFormOne = false;
+          });
+          dismissDialog(context);
+        }
+        else if((response.statusCode == 200 && responseData['code'] == 422)){
+          dismissDialog(context);
+          showErrorMessage(context, 'Oops', 'We couldn\'t find an account associated with the phone number you entered. Please check the number and try again.',
+                  () {
+                Navigator.pop(context);
+              });
+        }
+        else{
+          showToastMessage('Please try again');
+          dismissDialog(context);
+        }
+      }
+    } catch (e) {
+      if(mounted){
+        print('Connection Error $e');
+        dismissDialog(context);
+        showErrorMessage(context, 'Oops', 'An unexpected error occurred',
+                () {
+              Navigator.pop(context);
+            });
+      }
+    }
+  }
+
+  void verifyOTP() async{
+    showLoadingDialog(context);
+    try {
+      final response = await ApiService().verifyOTPPasswordReset(otpCode, resourceId)
+          .timeout(const Duration(seconds: 40));
+      final responseData = jsonDecode(response.body);
+
+      print('Response Body $responseData');
+      if(mounted){
+        if(response.statusCode == 200 && responseData['code'] == 200){
+          setState(() {
+            showFormTwo = false;
+            showFormThree = true;
+            showFormOne = false;
+          });
+          dismissDialog(context);
+        }
+        else {
+          showToastMessage(responseData['errors'].toString());
+          dismissDialog(context);
+        }
+      }
+    } catch (e) {
+      if(mounted){
+        print('Connection Error $e');
+        dismissDialog(context);
+        showErrorMessage(context, 'Oops', 'An unexpected error occurred',
+                () {
+              Navigator.pop(context);
+            });
+      }
+    }
+  }
+
+  void createPassword() async{
+    showLoadingDialog(context);
+    try {
+      final response = await ApiService().resetPassword(passwordController.text.trim(),
+          confirmPasswordController.text.trim() , resourceId)
+          .timeout(const Duration(seconds: 40));
+      final responseData = jsonDecode(response.body);
+
+      print('Response Body $responseData');
+      if(mounted){
+        if(response.statusCode == 200 && responseData['code'] == 200){
+          showCongratulationMessage(context, 'Password Reset',
+              'Your password has been successfully reset. You can now log in to your account using your new password.',
+              'Login', () {
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginScreen()), (_) => false
+                );
+              });
+        }
+        else {
+          dismissDialog(context);
+          showErrorMessage(context, 'Oops', responseData['errors'].toString(),
+                  () {
+                Navigator.pop(context);
+              });
+        }
+      }
+    } catch (e) {
+      if(mounted){
+        print('Connection Error $e');
+        dismissDialog(context);
+        showErrorMessage(context, 'Oops', 'An unexpected error occurred',
+                () {
+              Navigator.pop(context);
+            });
+      }
+    }
   }
 
 }

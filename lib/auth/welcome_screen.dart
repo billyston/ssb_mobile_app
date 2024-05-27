@@ -2,7 +2,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:susubox/auth/continue_registration_ussd.dart';
-import 'package:susubox/auth/login.dart';
+import 'package:susubox/auth/login_screen.dart';
 import 'package:susubox/auth/register_screen.dart';
 import 'package:susubox/utils/utils.dart';
 

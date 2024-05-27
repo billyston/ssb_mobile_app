@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:susubox/model/susu_schemes.dart';
+import 'package:susubox/screens/create_susu/create_flexy_susu_screen.dart';
+import 'package:susubox/screens/create_susu/create_goal_getter_susu_screen.dart';
+import 'package:susubox/screens/create_susu/create_personal_susu_screen.dart';
 import 'package:susubox/utils/utils.dart';
 
+import '../ApiService/api_service.dart';
 import '../components/arrow_pointer.dart';
+import '../components/loading_dialog.dart';
+import '../screens/create_susu/create_biz_susu_screen.dart';
 
 class SchemesCardData{
   final String name;
@@ -42,10 +50,52 @@ class _SusuScreenState extends State<SusuScreen> {
     const MyAccountCardData('AJ Ventures', 'Biz susu', '2900', 15),
     const MyAccountCardData('Mom Savings', 'Personal susu', '2900', 3),
   ];
-  
+
+  SusuSchemes? susuSchemes;
+  List<Datum> schemesData = [];
+
   bool showMyAccount = true;
   bool showAllAccounts = false;
+  bool dataLoaded = false;
+  bool errorOccurred = false;
 
+  String token = '';
+  String resourceId = '';
+
+  void getData() async{
+    final prefs = await SharedPreferences.getInstance();
+    token = (prefs.getString('token') ?? '');
+    resourceId = (prefs.getString('resourceId') ?? '');
+    getSusuSchemes();
+  }
+
+  Future<SusuSchemes?> getSusuSchemes() async{
+    setState(() {
+      dataLoaded = false;
+      errorOccurred = false;
+    });
+    try {
+      susuSchemes = await ApiService().getSusuSchemes(token).timeout(const Duration(seconds: 90));
+      schemesData = susuSchemes!.data;
+      print('Schemes $schemesData');
+      setState(() {
+        dataLoaded = true;
+      });
+    }
+    catch(e){
+      print('Error happened $e');
+      setState(() {
+        errorOccurred = true;
+      });
+    }
+    return null;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getData();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,7 +134,7 @@ class _SusuScreenState extends State<SusuScreen> {
                             borderRadius: BorderRadius.circular(5),
                             color: showMyAccount ? buttonColor : textFieldColor,
                           ),
-                          child: Text('My Account',
+                          child: Text('My susu',
                             style: TextStyle(
                                 fontSize: 14.sp,
                                 color: showMyAccount ? Colors.white : Colors.grey,
@@ -97,7 +147,7 @@ class _SusuScreenState extends State<SusuScreen> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(5),
                         ),
-                        child: Text('All Accounts',
+                        child: Text('Susu schemes',
                           style: TextStyle(
                               fontSize: 14.sp,
                               color: showAllAccounts ? Colors.white : Colors.grey,
@@ -110,17 +160,19 @@ class _SusuScreenState extends State<SusuScreen> {
               ),
             ),
             if(showAllAccounts)
-              allAccounts()
+              allSchemes()
             else if(showMyAccount)
-              myAccount()
+              noScheme()
           ],
         ),
       ),
     );
   }
 
-  Widget allAccounts(){
-    return Padding(
+  Widget allSchemes(){
+    return errorOccurred ? Container()
+      : dataLoaded ?
+        Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -142,7 +194,7 @@ class _SusuScreenState extends State<SusuScreen> {
               mainAxisSpacing: 20.0,
               mainAxisExtent: 178.h
             ),
-            itemCount: cardDataList.length,
+            itemCount: schemesData.length,
             itemBuilder: (context, index) {
               return Container(
                     padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 7.h),
@@ -152,51 +204,70 @@ class _SusuScreenState extends State<SusuScreen> {
                     ),
                     child: Column(
                       children: [
-                        Text(cardDataList[index].name,
+                        Text(schemesData[index].attributes.name,
                           style: TextStyle(fontSize: 20.sp, color: buttonColor, fontWeight: FontWeight.w500),
                         ),
                         SizedBox(height: 3.h),
-                        Text(cardDataList[index].description,
+                        Text(schemesData[index].attributes.description,
                             style: TextStyle(fontSize: 14.sp, color: Colors.grey, fontWeight: FontWeight.w500),
                         ),
                         const Spacer(),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              minimumSize: const Size(50,30)
-                          ),
-                          onPressed: () {
-                            switch(index){
-                              case 0:
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            TextButton(
+                              onPressed: () {
+                                switch(index){
+                                  case 0:
 
-                              case 1:
+                                  case 1:
 
-                              case 2:
+                                  case 2:
 
-                              case 3:
+                                  case 3:
 
-                        }
-                          },
-                          child: Text('View details',
-                              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400, color: Colors.white)),
+                            }
+                              },
+                              child: Text('View details',
+                                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400, color: buttonColor)),
+                            ),
+                            GestureDetector(
+                              onTap: (){
+                                switch(index){
+                                  case 0:
+                                    Navigator.push(context,
+                                      MaterialPageRoute(builder: (context) => const CreatePersonalSusuScreen()),
+                                    );
+                                  case 1:
+                                    Navigator.push(context,
+                                      MaterialPageRoute(builder: (context) => const CreateBizSusuScreen()),
+                                    );
+                                  case 2:
+                                    Navigator.push(context,
+                                      MaterialPageRoute(builder: (context) => const CreateGoalGetterSusuScreen()),
+                                    );
+                                  case 3:
+                                    Navigator.push(context,
+                                      MaterialPageRoute(builder: (context) => const CreateFlexySusuScreen()),
+                                    );
+                            }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(7),
+                                decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: const Color(0xFF79552B),
+                                    border: Border.all(color: buttonColor)
+                                ),
+                                child: const Icon(
+                                  Icons.add,
+                                  color: buttonColor,
+                                ),
+                              ),
+                            )
+                          ],
                         ),
                         SizedBox(height: 5.h),
-                        GestureDetector(
-                          onTap: (){
-
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(7),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: const Color(0xFF79552B),
-                              border: Border.all(color: buttonColor)
-                            ),
-                            child: const Icon(
-                              Icons.add,
-                              color: buttonColor,
-                            ),
-                          ),
-                        )
                       ],
                     ),
               );
@@ -204,10 +275,10 @@ class _SusuScreenState extends State<SusuScreen> {
           ),
         ],
       ),
-    );
+    ) : const LoadingDialog();
   }
 
-  Widget myAccount(){
+  Widget mySchemes(){
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w),
       child: ListView.separated(
@@ -352,21 +423,24 @@ class _SusuScreenState extends State<SusuScreen> {
     );
   }
 
-  Widget noAccount(){
+  Widget noScheme(){
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w),
       child: Column(
           children: [
-            SizedBox(
-                height: MediaQuery.of(context).size.height * 0.15,
-            child: CustomPaint(
-              painter: ArrowPainter(),
+            Padding(
+              padding: EdgeInsets.only(left: 90.w),
+              child: SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.15,
+              child: CustomPaint(
+                painter: ArrowPainter(),
+              ),
+              ),
             ),
-            ),
-            Text('You\'ve not added any',
+            Text('You\'ve not started any',
                 style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w700, color: Colors.white)
             ),
-            Text('account yet',
+            Text('susu yet',
                 style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w700, color: Colors.white)
             ),
             SizedBox(height: 10.h),
@@ -383,16 +457,19 @@ class _SusuScreenState extends State<SusuScreen> {
                       showMyAccount = false;
                     });
                   },
-                  child: Text('All Accounts ',
+                  child: Text('Susu Schemes ',
                       style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w400, color: buttonColor)
                   ),
                 ),
-                Text('and add an account',
+                Text('and create a new',
                     style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w400, color: Colors.grey)
                 ),
               ],
             ),
-            Text('to manage your finances here',
+            Text('susu account to start saving and ',
+                style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w400, color: Colors.grey)
+            ),
+            Text('manage your finances here',
                 style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w400, color: Colors.grey)
             ),
           ],

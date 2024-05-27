@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:susubox/auth/login.dart';
+import 'package:susubox/auth/login_screen.dart';
 import 'package:susubox/components/ghanacard_dialog.dart';
 import 'package:susubox/components/next_of_kin_dialog.dart';
 import 'package:susubox/components/personal_info_dialog.dart';

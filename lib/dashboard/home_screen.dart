@@ -1,8 +1,12 @@
 import 'package:carousel_slider/carousel_options.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:susubox/utils/utils.dart';
+
+import '../components/link_account_dialog.dart';
 
 class GroupData {
   String title;
@@ -40,9 +44,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<CardData> cardDataList = [
     const CardData('About', 'Learn more about Susubox', Icons.people_alt_rounded),
-    const CardData('Products', 'Diverse susu products', Icons.category),
-    const CardData('Terms & Conditions', 'View our T&Cs', Icons.document_scanner),
-    const CardData('Help & Support', '24/7 help/support service', Icons.support_agent)
+    const CardData('Products', 'Diverse susu products', Icons.add),
+    const CardData('Terms & Conditions', 'View our T&Cs', CupertinoIcons.plus_rectangle_on_rectangle),
+    const CardData('Help & Support', '24/7 help/support service', CupertinoIcons.chat_bubble_2_fill)
   ];
 
   int _currentPage = 0;
@@ -62,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 CarouselSlider.builder(
                   itemCount: 3,
                   options: CarouselOptions(
-                    height: MediaQuery.of(context).size.height * 0.37,
+                    height: MediaQuery.of(context).size.height * 0.35,
                     autoPlay: true,
                     viewportFraction: 1.0,
                     onPageChanged: (index, reason) {
@@ -152,7 +156,43 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                 ),
-                SizedBox(height: 20.h),
+                SizedBox(height: 10.h),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 17.w),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Quick Account',
+                         style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w700, color: Colors.white),
+                      ),
+                      GestureDetector(
+                        onTap: (){
+                          showLoadingDialog(context);
+                        },
+                        child: Row(
+                          children: [
+                            Text('View all',
+                              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                            ),
+                            SizedBox(width: 3.w),
+                            Container(
+                              padding: const EdgeInsets.all(3),
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: buttonColor
+                              ),
+                              child: Icon(
+                                Icons.arrow_forward_ios,
+                                size: 8.h,
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 10.h),
                 Padding(
                   padding: EdgeInsets.only(left: 18.w),
                   child: SizedBox(
