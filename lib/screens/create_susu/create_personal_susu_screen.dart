@@ -10,7 +10,7 @@ import 'package:susubox/components/loading_dialog.dart';
 import 'package:susubox/model/linked_accounts.dart';
 
 import '../../ApiService/api_service.dart';
-import '../../components/link_account_dialog.dart';
+import '../../components/dialogs/link_account_dialog.dart';
 import '../../utils/utils.dart';
 
 class CreatePersonalSusuScreen extends StatefulWidget {

@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
-import '../utils/utils.dart';
+import '../../utils/utils.dart';
 
 class NextOfKinDialog extends StatefulWidget {
   const NextOfKinDialog({super.key});

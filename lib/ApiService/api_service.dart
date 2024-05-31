@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:susubox/model/linked_accounts.dart';
 import 'package:susubox/model/network_schemes.dart';
+import 'package:susubox/model/susu_accounts.dart';
 import 'package:susubox/model/susu_schemes.dart';
 
 import '../constants/ApiConstants.dart';
@@ -470,5 +471,28 @@ class ApiService {
       body: jsonEncode(requestBody),
     );
   }
+
+  Future<SusuAccounts> getSusuAccounts(String token) async {
+    final response = await http.get(
+      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.getAllSusu}'),
+      headers: {
+        "Authorization" : "Bearer $token",
+        "Content-Type": "application/json"
+      },
+    );
+
+    if (response.statusCode == 200) {
+
+      final decodedData = json.decode(response.body);
+      print(decodedData);
+
+      SusuAccounts susuAccounts = susuAccountsFromJson(json.encode(decodedData));
+
+      return susuAccounts;
+    } else {
+      throw Exception('Failed to load susu accounts');
+    }
+  }
+
 
 }

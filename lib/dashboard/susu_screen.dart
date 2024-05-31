@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:susubox/components/error_container.dart';
+import 'package:susubox/model/susu_accounts.dart'as susu_account;
 import 'package:susubox/model/susu_schemes.dart';
 import 'package:susubox/screens/create_susu/create_flexy_susu_screen.dart';
 import 'package:susubox/screens/create_susu/create_goal_getter_susu_screen.dart';
@@ -35,7 +37,10 @@ class SusuScreen extends StatefulWidget {
   State<SusuScreen> createState() => _SusuScreenState();
 }
 
-class _SusuScreenState extends State<SusuScreen> {
+class _SusuScreenState extends State<SusuScreen> with AutomaticKeepAliveClientMixin {
+
+  @override
+  bool get wantKeepAlive => true;
 
   final List<SchemesCardData> cardDataList = [
     const SchemesCardData('Personal Susu', 'Save money towards your personal needs such as education, home etc.'),
@@ -54,10 +59,15 @@ class _SusuScreenState extends State<SusuScreen> {
   SusuSchemes? susuSchemes;
   List<Datum> schemesData = [];
 
+  susu_account.SusuAccounts? susuAccounts;
+  List<susu_account.Datum> susuAccountsData = [];
+
   bool showMyAccount = true;
   bool showAllAccounts = false;
   bool dataLoaded = false;
   bool errorOccurred = false;
+  bool susuDataLoaded = false;
+  bool susuErrorOccurred = false;
 
   String token = '';
   String resourceId = '';
@@ -66,6 +76,7 @@ class _SusuScreenState extends State<SusuScreen> {
     final prefs = await SharedPreferences.getInstance();
     token = (prefs.getString('token') ?? '');
     resourceId = (prefs.getString('resourceId') ?? '');
+    getAllSusuAccounts();
     getSusuSchemes();
   }
 
@@ -91,6 +102,28 @@ class _SusuScreenState extends State<SusuScreen> {
     return null;
   }
 
+  Future<SusuSchemes?> getAllSusuAccounts() async{
+    setState(() {
+      dataLoaded = false;
+      errorOccurred = false;
+    });
+    try {
+      susuAccounts = await ApiService().getSusuAccounts(token).timeout(const Duration(seconds: 90));
+      susuAccountsData = susuAccounts!.data;
+      print('Susu Data $susuAccountsData');
+      setState(() {
+        susuDataLoaded = true;
+      });
+    }
+    catch(e){
+      print('Error happened $e');
+      setState(() {
+        susuErrorOccurred = true;
+      });
+    }
+    return null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -98,6 +131,7 @@ class _SusuScreenState extends State<SusuScreen> {
   }
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -162,7 +196,10 @@ class _SusuScreenState extends State<SusuScreen> {
             if(showAllAccounts)
               allSchemes()
             else if(showMyAccount)
-              noScheme()
+              susuErrorOccurred ? ErrorContainer(refreshPage: getAllSusuAccounts)
+              : susuDataLoaded ?
+             susuAccountsData.isNotEmpty ? mySchemes() : noScheme()
+                  : const LoadingDialog()
           ],
         ),
       ),
@@ -170,7 +207,7 @@ class _SusuScreenState extends State<SusuScreen> {
   }
 
   Widget allSchemes(){
-    return errorOccurred ? Container()
+    return errorOccurred ? ErrorContainer(refreshPage: getSusuSchemes)
       : dataLoaded ?
         Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -194,7 +231,7 @@ class _SusuScreenState extends State<SusuScreen> {
               mainAxisSpacing: 20.0,
               mainAxisExtent: 178.h
             ),
-            itemCount: schemesData.length,
+            itemCount: schemesData.length < 2 ? schemesData.length : 4,
             itemBuilder: (context, index) {
               return Container(
                     padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 7.h),
@@ -284,7 +321,7 @@ class _SusuScreenState extends State<SusuScreen> {
       child: ListView.separated(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        itemCount: accountCardData.length,
+        itemCount: susuAccountsData.length,
         itemBuilder: (context, index) {
 
           bool activateButton = accountCardData[index].dueDays < 1;
@@ -315,10 +352,10 @@ class _SusuScreenState extends State<SusuScreen> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(accountCardData[index].scheme,
+                            Text(susuAccountsData[index].attributes.scheme,
                               style: TextStyle(fontSize: 11.sp, color: buttonColor, fontWeight: FontWeight.w500),
                             ),
-                            Text(accountCardData[index].name,
+                            Text(susuAccountsData[index].attributes.accountName,
                               style: TextStyle(fontSize: 17.sp, color: Colors.white, fontWeight: FontWeight.w700),
                             ),
                           ],

@@ -8,7 +8,7 @@ import 'package:susubox/components/loading_dialog.dart';
 
 import '../../ApiService/api_service.dart';
 import '../../components/error_container.dart';
-import '../../components/link_account_dialog.dart';
+import '../../components/dialogs/link_account_dialog.dart';
 import '../../model/linked_accounts.dart';
 import '../../utils/utils.dart';
 

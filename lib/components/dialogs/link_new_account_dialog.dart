@@ -5,20 +5,20 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:phone_form_field/phone_form_field.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:susubox/components/loading_dialog.dart';
-import 'package:susubox/model/network_schemes.dart';
 
-import '../ApiService/api_service.dart';
-import '../utils/utils.dart';
+import '../../ApiService/api_service.dart';
+import '../../model/network_schemes.dart';
+import '../../utils/utils.dart';
+import '../loading_dialog.dart';
 
-class LinkAccountDialog extends StatefulWidget {
-  const LinkAccountDialog({super.key});
+class LinkNewAccountDialog extends StatefulWidget {
+  const LinkNewAccountDialog({super.key});
 
   @override
-  State<LinkAccountDialog> createState() => _LinkAccountDialogState();
+  State<LinkNewAccountDialog> createState() => _LinkNewAccountDialogState();
 }
 
-class _LinkAccountDialogState extends State<LinkAccountDialog> {
+class _LinkNewAccountDialogState extends State<LinkNewAccountDialog> {
   final key = GlobalKey<FormState>();
   bool isEditing = false;
   bool enableButton = false;
@@ -61,9 +61,9 @@ class _LinkAccountDialogState extends State<LinkAccountDialog> {
     }
     catch(e){
       print('Error happened $e');
-      //setState(() {
+      setState(() {
         errorOccurred = true;
-     // });
+      });
     }
     return null;
   }
@@ -78,35 +78,23 @@ class _LinkAccountDialogState extends State<LinkAccountDialog> {
   void initState() {
     super.initState();
     getData();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (showErrorDialog) {
-        showMessage(context, 'Oops', 'You have not linked any mobile money wallet to your Susubox account.', 'Link Mobile Money',
-          () {
-            setState(() {
-              showErrorDialog = false;
-            });
-            Navigator.pop(context);
-        },
-        );
-      }
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     return errorOccurred ? Container()
-    : dataLoaded ?
-      showErrorDialog ? Container() : PopScope(
-        canPop: false,
-        onPopInvoked: (didPop) {
-          if (didPop) {
-            return;
-          }
-          int count = 0;
-          Navigator.popUntil(context, (route) {
-            return count++ == 2;
-          });
-        },
+        : dataLoaded ?
+     PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) {
+          return;
+        }
+        int count = 0;
+        Navigator.popUntil(context, (route) {
+          return count++ == 1;
+        });
+      },
       child: SingleChildScrollView(
         child: AlertDialog(
             backgroundColor: blackFaded,
@@ -182,37 +170,37 @@ class _LinkAccountDialogState extends State<LinkAccountDialog> {
             ),
             SizedBox(height: MediaQuery.of(context).size.height * 0.03),
             PhoneFormField(
-                initialValue: PhoneNumber.parse('+233'),
-                countrySelectorNavigator: const CountrySelectorNavigator.page(),
-                onChanged: (phoneNumber) {
-                  phoneController.text = '+${phoneNumber.countryCode}${phoneNumber.nsn}';
-                  enableButton = phoneController.text.length == 13 && accountIssuerController.text.isNotEmpty;
-                },
-                enabled: true,
-                isCountrySelectionEnabled: false,
-                isCountryButtonPersistent: true,
-                countryButtonStyle: CountryButtonStyle(
-                  showDropdownIcon: false,
-                  showDialCode: true,
-                  showIsoCode: false,
-                  showFlag: true,
-                  flagSize: 20.h,
-                  textStyle: TextStyle(
-                      fontSize: 14.sp,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w300),
-                ),
-                decoration: const InputDecoration(
-                  hintText: 'Phone Number',
-                ),
-                inputFormatters: <TextInputFormatter>[
-                  LengthLimitingTextInputFormatter(11),
-                  FilteringTextInputFormatter.allow(RegExp('[0-9+]'))
-                ],
-                style: TextStyle(
+              initialValue: PhoneNumber.parse('+233'),
+              countrySelectorNavigator: const CountrySelectorNavigator.page(),
+              onChanged: (phoneNumber) {
+                phoneController.text = '+${phoneNumber.countryCode}${phoneNumber.nsn}';
+                enableButton = phoneController.text.length == 13 && accountIssuerController.text.isNotEmpty;
+              },
+              enabled: true,
+              isCountrySelectionEnabled: false,
+              isCountryButtonPersistent: true,
+              countryButtonStyle: CountryButtonStyle(
+                showDropdownIcon: false,
+                showDialCode: true,
+                showIsoCode: false,
+                showFlag: true,
+                flagSize: 20.h,
+                textStyle: TextStyle(
                     fontSize: 14.sp,
                     color: Colors.white,
                     fontWeight: FontWeight.w300),
+              ),
+              decoration: const InputDecoration(
+                hintText: 'Phone Number',
+              ),
+              inputFormatters: <TextInputFormatter>[
+                LengthLimitingTextInputFormatter(11),
+                FilteringTextInputFormatter.allow(RegExp('[0-9+]'))
+              ],
+              style: TextStyle(
+                  fontSize: 14.sp,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w300),
             ),
             SizedBox(height: MediaQuery.of(context).size.height * 0.03),
             enableButton == false
@@ -331,7 +319,7 @@ class _LinkAccountDialogState extends State<LinkAccountDialog> {
             }
             int count = 0;
             Navigator.popUntil(context, (route) {
-              return count++ == 2;
+              return count++ == 1;
             });
           },
           child: AlertDialog(
@@ -464,5 +452,4 @@ class _LinkAccountDialogState extends State<LinkAccountDialog> {
   }
 
 }
-
 

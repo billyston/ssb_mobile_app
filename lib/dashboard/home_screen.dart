@@ -4,9 +4,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:susubox/dashboard/dashboard_screen.dart';
+import 'package:susubox/dashboard/susu_screen.dart';
 import 'package:susubox/utils/utils.dart';
 
-import '../components/link_account_dialog.dart';
+import '../components/dialogs/link_account_dialog.dart';
 
 class GroupData {
   String title;
@@ -167,7 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       GestureDetector(
                         onTap: (){
-                          showLoadingDialog(context);
+
                         },
                         child: Row(
                           children: [

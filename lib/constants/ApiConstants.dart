@@ -21,6 +21,7 @@ class ApiConstants{
   static String approvals = '/approvals';
 
   static String susuSchemes = 'customers/susus/schemes';
+  static String getAllSusu = 'customers/susus';
 
   static String createPersonalSusu = 'customers/susus/personal-susus/creations';
   static String approvePersonalSusu = 'customers/susus/personal-susus/';

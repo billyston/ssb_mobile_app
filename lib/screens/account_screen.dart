@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:susubox/auth/login_screen.dart';
-import 'package:susubox/components/ghanacard_dialog.dart';
-import 'package:susubox/components/next_of_kin_dialog.dart';
-import 'package:susubox/components/personal_info_dialog.dart';
+import 'package:susubox/components/dialogs/ghanacard_dialog.dart';
+import 'package:susubox/components/dialogs/link_new_account_dialog.dart';
+import 'package:susubox/components/dialogs/next_of_kin_dialog.dart';
+import 'package:susubox/components/dialogs/personal_info_dialog.dart';
 import 'package:susubox/utils/utils.dart';
+
+import '../components/dialogs/link_account_dialog.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -14,6 +17,7 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -243,7 +247,10 @@ class _AccountScreenState extends State<AccountScreen> {
                         children: [
                           GestureDetector(
                             onTap: (){
-        
+                              showDialog(
+                                context: context,
+                                builder: (context) => const LinkNewAccountDialog(),
+                              );
                             },
                             child: Container(
                               alignment: Alignment.center,

@@ -6,7 +6,7 @@ import 'package:susubox/dashboard/susu_screen.dart';
 import 'package:susubox/model/linked_accounts.dart';
 import 'package:susubox/utils/utils.dart';
 
-import '../components/link_account_dialog.dart';
+import '../components/dialogs/link_account_dialog.dart';
 
 class DashboardScreen extends StatefulWidget {
 
@@ -23,52 +23,69 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: PageView(
-          controller: pageController,
-          physics: const NeverScrollableScrollPhysics(),
-          children: const <Widget>[
-            HomeScreen(),
-            SusuScreen(),
-            SettingsScreen()
-          ],
-        ),
-        bottomNavigationBar: ClipRRect(
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) {
+          return;
+        }
+        if(selectedIndex != 0){
+          setState(() {
+            selectedIndex = 0;
+            pageController.jumpToPage(0);
+          });
+        }
+        else{
+          Navigator.pop(context);
+        }
+      },
+      child: Scaffold(
+          body: PageView(
+            controller: pageController,
+            physics: const NeverScrollableScrollPhysics(),
+            children: const <Widget>[
+              HomeScreen(),
+              SusuScreen(),
+              SettingsScreen()
+            ],
           ),
-          child: SizedBox(
-            height: MediaQuery.of(context).size.height * 0.08,
-            child: BottomNavigationBar(
-                  type: BottomNavigationBarType.fixed,
-                   backgroundColor: bottomAppBarColor,
-                  currentIndex: selectedIndex,
-                  selectedItemColor: buttonColor,
-                  unselectedItemColor: Colors.white,
-                  onTap: (index) {
-                    setState(() {
-                      selectedIndex = index;
-                      pageController.jumpToPage(index);
-                    });
-                  },
-                  items: [
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.home_filled, size: 15.h,),
-                      label: 'Home',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.account_balance_wallet, size: 15.h),
-                      label: 'Susu',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.settings, size: 15.h),
-                      label: 'Settings',
-                    ),
-                  ],
-                ),
+          bottomNavigationBar: ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height * 0.08,
+              child: BottomNavigationBar(
+                    type: BottomNavigationBarType.fixed,
+                     backgroundColor: bottomAppBarColor,
+                    currentIndex: selectedIndex,
+                    selectedItemColor: buttonColor,
+                    unselectedItemColor: Colors.white,
+                    onTap: (index) {
+                      setState(() {
+                        selectedIndex = index;
+                        pageController.jumpToPage(index);
+                      });
+                    },
+                    items: [
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.home_filled, size: 15.h,),
+                        label: 'Home',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.account_balance_wallet, size: 15.h),
+                        label: 'Susu',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.settings, size: 15.h),
+                        label: 'Settings',
+                      ),
+                    ],
+                  ),
+            ),
           ),
-        ),
+      ),
     );
   }
 }
