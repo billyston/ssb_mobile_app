@@ -29,4 +29,21 @@ class ApiConstants{
   static String createBizSusu = 'customers/susus/biz-susus/creations';
   static String approveBizSusu = 'customers/susus/biz-susus/';
 
+  static String createGoalGetterSusu = 'customers/susus/goal-getter-susus/creations';
+  static String approveGoalGetterSusu = 'customers/susus/goal-getter-susus/';
+
+  static String createFlexySusu = 'customers/susus/flexy-susus/creations';
+  static String approveFlexySusu = 'customers/susus/flexy-susus/';
+
+  static String getPersonalSusu = 'customers/susus/personal-susus/';
+  static String getBizSusu = 'customers/susus/biz-susus/';
+  static String getGoalGetterSusu = 'customers/susus/goal-getter-susus/';
+  static String getFlexySusu = 'customers/susus/flexy-susus/';
+
+  static String getBalance = 'customers/susus/';
+
+  static String getTransactionHistory = 'customers/susus/';
+
+
+
 }

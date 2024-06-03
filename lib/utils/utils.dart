@@ -3,9 +3,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 const buttonColor = Color(0xFFFF7955);
+const customGreen = Color(0xFF57BF9C);
+const customBrown = Color(0xFFECB265);
+const customPurple = Color(0xFFC09FF8);
 const textFieldColor = Color(0xFF565358);
 const blackBackground = Color(0xFF1F1F1F);
 const blackFaded = Color(0xFF303030);
+const dialogColor = Color(0xFF575656);
 const bottomAppBarColor = Color(0xFF1A1919);
 
 void showToastMessage(String message) {
@@ -177,4 +181,74 @@ void showCongratulationMessage(BuildContext context, String title, String messag
       );
     },
   );
+}
+
+void showSusuSchemeDetails(BuildContext context, String title, String content){
+  showModalBottomSheet(
+      backgroundColor: Colors.black.withOpacity(0.7),
+      showDragHandle: true,
+      enableDrag: true,
+      isScrollControlled: true,
+      context: context,
+      builder: (context) {
+        return FractionallySizedBox(
+            heightFactor: 0.8,
+            child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 15.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            children: <Widget>[
+             Text(title,
+               style: TextStyle(color: Colors.white, fontSize: 40.sp, fontWeight: FontWeight.w700, height: 1),
+             ),
+              SizedBox(height: 15.h),
+              Text('About Scheme',
+                style: TextStyle(color: buttonColor, fontSize: 15.sp, fontWeight: FontWeight.w500, height: 1),
+              ),
+              SizedBox(height: 15.h),
+              Text(content,
+                style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.w500, height: 1),
+              ),
+              SizedBox(height: 15.h),
+              Text('Key Features',
+                    style: TextStyle(color: buttonColor, fontSize: 15.sp, fontWeight: FontWeight.w500, height: 1),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Terms and Conditions',
+                      style: TextStyle(color: buttonColor, fontSize: 15.sp, fontWeight: FontWeight.w500, height: 1),
+                  ),
+                  Column(
+                    children: [
+                      GestureDetector(
+                        onTap: (){
+
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(7),
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: const Color(0xFF79552B),
+                              border: Border.all(color: buttonColor)
+                          ),
+                          child: const Icon(
+                            Icons.add,
+                            color: buttonColor,
+                          ),
+                        ),
+                      ),
+                      Text('Add account',
+                        style: TextStyle(color: Colors.white, fontSize: 15.sp, fontWeight: FontWeight.w500, height: 1),
+                      ),
+                    ],
+                  )
+                ],
+              )
+            ],
+          ),
+            )
+        );
+      });
 }

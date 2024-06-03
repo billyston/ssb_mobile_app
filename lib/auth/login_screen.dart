@@ -191,7 +191,7 @@ class _LoginScreenState extends State<LoginScreen> {
         if (response.statusCode == 200 && responseData['code'] == 200) {
           dismissDialog(context);
           Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const DashboardScreen()),
+            MaterialPageRoute(builder: (context) => DashboardScreen(selectedBottomIndex: 0, initialPage: 0)),
           );
           final prefs = await SharedPreferences.getInstance();
           prefs.setString('token', responseData['token']['access_token']);

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:phone_form_field/phone_form_field.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:susubox/components/error_container.dart';
 import 'package:susubox/components/loading_dialog.dart';
 import 'package:susubox/model/network_schemes.dart';
 
@@ -94,7 +95,7 @@ class _LinkAccountDialogState extends State<LinkAccountDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return errorOccurred ? Container()
+    return errorOccurred ? ErrorContainer(refreshPage: refreshPage)
     : dataLoaded ?
       showErrorDialog ? Container() : PopScope(
         canPop: false,
@@ -331,7 +332,7 @@ class _LinkAccountDialogState extends State<LinkAccountDialog> {
             }
             int count = 0;
             Navigator.popUntil(context, (route) {
-              return count++ == 2;
+              return count++ == 3;
             });
           },
           child: AlertDialog(
@@ -463,6 +464,11 @@ class _LinkAccountDialogState extends State<LinkAccountDialog> {
     }
   }
 
+  void refreshPage(){
+    setState(() {
+
+    });
+  }
 }
 
 

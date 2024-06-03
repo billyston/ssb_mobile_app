@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:susubox/dashboard/home_screen.dart';
 import 'package:susubox/dashboard/settings_screen.dart';
 import 'package:susubox/dashboard/susu_screen.dart';
@@ -9,8 +10,10 @@ import 'package:susubox/utils/utils.dart';
 import '../components/dialogs/link_account_dialog.dart';
 
 class DashboardScreen extends StatefulWidget {
+  int selectedBottomIndex;
+  int initialPage;
 
-  const DashboardScreen({ super.key});
+   DashboardScreen({required this.selectedBottomIndex, required this.initialPage, super.key});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -18,7 +21,7 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
 
-  final PageController pageController = PageController(initialPage: 0);
+  late PageController pageController = PageController(initialPage: widget.initialPage);
   int selectedIndex = 0;
 
   @override
@@ -29,9 +32,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         if (didPop) {
           return;
         }
-        if(selectedIndex != 0){
+        if(widget.selectedBottomIndex != 0){
           setState(() {
-            selectedIndex = 0;
+            widget.selectedBottomIndex = 0;
             pageController.jumpToPage(0);
           });
         }
@@ -59,12 +62,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: BottomNavigationBar(
                     type: BottomNavigationBarType.fixed,
                      backgroundColor: bottomAppBarColor,
-                    currentIndex: selectedIndex,
+                    currentIndex: widget.selectedBottomIndex,
                     selectedItemColor: buttonColor,
                     unselectedItemColor: Colors.white,
                     onTap: (index) {
                       setState(() {
-                        selectedIndex = index;
+                        widget.selectedBottomIndex = index;
                         pageController.jumpToPage(index);
                       });
                     },
@@ -74,7 +77,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         label: 'Home',
                       ),
                       BottomNavigationBarItem(
-                        icon: Icon(Icons.account_balance_wallet, size: 15.h),
+                        icon: Icon(FontAwesomeIcons.wallet, size: 15.h),
                         label: 'Susu',
                       ),
                       BottomNavigationBarItem(

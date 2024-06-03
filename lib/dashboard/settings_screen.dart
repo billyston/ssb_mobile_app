@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:susubox/screens/account_screen.dart';
 import 'package:susubox/utils/utils.dart';
 
+import '../auth/login_screen.dart';
+
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -110,6 +112,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 title: Text('Logout',
                   style: TextStyle(color: Colors.white, fontSize:14.sp, fontWeight: FontWeight.w400),
                 ),
+                onTap: (){
+                  Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => const LoginScreen()), (_) => false
+                  );
+                },
               ),
             ],
           ),

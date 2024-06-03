@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:susubox/components/error_container.dart';
 import 'package:susubox/components/loading_dialog.dart';
+import 'package:susubox/dashboard/dashboard_screen.dart';
 import 'package:susubox/model/linked_accounts.dart';
 
 import '../../ApiService/api_service.dart';
@@ -517,10 +518,11 @@ class _CreatePersonalSusuScreenState extends State<CreatePersonalSusuScreen> {
           showCongratulationMessage(context, 'Congratulations',
               'Your personal susu has been created. You will be debited GHS ${amountController.text} daily. We advise you always maintain such balance in your ${linkedAccountController.text} mobile money wallet for successful debit.',
               'Ok', () {
-                int count = 0;
-                Navigator.popUntil(context, (route) {
-                  return count++ == 2;
-                });
+                Navigator.pop(context);
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => DashboardScreen(selectedBottomIndex: 1, initialPage: 1)), (_) => false
+                );
               });
         }
         else if(response.statusCode == 200 && responseData['code'] == 422){

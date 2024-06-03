@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -7,6 +9,7 @@ import 'package:susubox/components/loading_dialog.dart';
 import '../../ApiService/api_service.dart';
 import '../../components/error_container.dart';
 import '../../components/dialogs/link_account_dialog.dart';
+import '../../dashboard/dashboard_screen.dart';
 import '../../model/linked_accounts.dart';
 import '../../utils/utils.dart';
 
@@ -29,12 +32,15 @@ class _CreateGoalGetterSusuScreenState extends State<CreateGoalGetterSusuScreen>
 
   TextEditingController accountNameController = TextEditingController();
   TextEditingController purposeController = TextEditingController();
+  TextEditingController startController = TextEditingController();
+  TextEditingController durationController = TextEditingController();
   TextEditingController frequencyController = TextEditingController();
   TextEditingController linkedAccountController = TextEditingController();
   TextEditingController amountController = TextEditingController();
   TextEditingController pinController = TextEditingController();
   String token = '';
   String selectedAccountResourceId = '';
+  String linkedAccountResource = '';
 
   LinkedAccounts? accountsModel;
   List<Map<String, String>> linkedAccounts = [];
@@ -147,7 +153,7 @@ class _CreateGoalGetterSusuScreenState extends State<CreateGoalGetterSusuScreen>
                   SizedBox(height: MediaQuery
                       .of(context)
                       .size
-                      .height * 0.04),
+                      .height * 0.01),
                   if(showPinForm)
                     pinForm()
                   else
@@ -172,7 +178,7 @@ class _CreateGoalGetterSusuScreenState extends State<CreateGoalGetterSusuScreen>
         SizedBox(height: MediaQuery
             .of(context)
             .size
-            .height * 0.04),
+            .height * 0.02),
         TextFormField(
           controller: accountNameController,
           validator: (value) {
@@ -233,13 +239,85 @@ class _CreateGoalGetterSusuScreenState extends State<CreateGoalGetterSusuScreen>
             });
           },
           decoration: const InputDecoration(
-            hintText: 'Susu amount',
+            hintText: 'Target Amount',
           ),
           style: TextStyle(fontSize: 14.sp,
               color: Colors.white,
               fontWeight: FontWeight.w300),
           keyboardType: TextInputType.number,
           textInputAction: TextInputAction.next,
+        ),
+        SizedBox(height: 15.h),
+        DropdownButtonFormField<String>(
+          dropdownColor: blackFaded,
+          validator: (value) =>
+          value == null ? 'Please select start date' : null,
+          iconEnabledColor: Colors.grey,
+          isExpanded: true,
+          value: startController.text.isEmpty
+              ? null
+              : startController.text,
+          items: <String>['Today','Next-Week','Two-Weeks','One-Month']
+              .map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(
+                value,
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: Colors.white,
+                ),
+              ),
+            );
+          }).toList(),
+          decoration: InputDecoration(
+              hintText: 'Start',
+              hintStyle: TextStyle(fontSize: 14.sp, color: Colors.grey),
+              contentPadding: const EdgeInsets.symmetric(
+                  vertical: 10.0, horizontal: 10.0)
+          ),
+          onChanged: (String? value) {
+            setState(() {
+              startController.text = value!;
+              checkValidity();
+            });
+          },
+        ),
+        SizedBox(height: 15.h),
+        DropdownButtonFormField<String>(
+          dropdownColor: blackFaded,
+          validator: (value) =>
+          value == null ? 'Please select duration' : null,
+          iconEnabledColor: Colors.grey,
+          isExpanded: true,
+          value: durationController.text.isEmpty
+              ? null
+              : durationController.text,
+          items: <String>['One-Month','Three-Months','Six-Months','Nine-Months','One-Year']
+              .map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(
+                value,
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: Colors.white,
+                ),
+              ),
+            );
+          }).toList(),
+          decoration: InputDecoration(
+              hintText: 'Duratiom',
+              hintStyle: TextStyle(fontSize: 14.sp, color: Colors.grey),
+              contentPadding: const EdgeInsets.symmetric(
+                  vertical: 10.0, horizontal: 10.0)
+          ),
+          onChanged: (String? value) {
+            setState(() {
+              durationController.text = value!;
+              checkValidity();
+            });
+          },
         ),
         SizedBox(height: 15.h),
         DropdownButtonFormField<String>(
@@ -415,9 +493,7 @@ class _CreateGoalGetterSusuScreenState extends State<CreateGoalGetterSusuScreen>
             } else if (!isTermsChecked) {
               showToastMessage('Please accept terms and conditions');
             } else {
-              setState(() {
-                showPinForm = true;
-              });
+              createSusu();
             }
           },
           child: Text('Create Account',
@@ -425,6 +501,7 @@ class _CreateGoalGetterSusuScreenState extends State<CreateGoalGetterSusuScreen>
                   fontWeight: FontWeight.w400,
                   color: Colors.white)),
         ),
+        SizedBox(height: 10.h),
       ],
     );
   }
@@ -507,15 +584,7 @@ class _CreateGoalGetterSusuScreenState extends State<CreateGoalGetterSusuScreen>
             minimumSize: const Size.fromHeight(50),
           ),
           onPressed: () {
-            showCongratulationMessage(context, 'Congratulations',
-                'Your biz susu has been created. You will be debited GHS5.00 daily. We advise you always maintain such balance in your ${linkedAccountController
-                    .text} mobile money wallet for successful debit.',
-                'Ok', () {
-                  int count = 0;
-                  Navigator.popUntil(context, (route) {
-                    return count++ == 2;
-                  });
-                });
+            approveSusuCreation();
           },
           child: Text('Approve',
               style: TextStyle(fontSize: 14.sp,
@@ -527,12 +596,115 @@ class _CreateGoalGetterSusuScreenState extends State<CreateGoalGetterSusuScreen>
     );
   }
 
+  void createSusu() async {
+    showLoadingDialog(context);
+    try {
+      final response = await ApiService().createGoalGetterSusu(
+          accountNameController.text,
+          purposeController.text,
+          amountController.text,
+          startController.text.toLowerCase(),
+          durationController.text.toLowerCase(),
+          frequencyController.text.toLowerCase(),
+          selectedAccountResourceId,
+          token)
+          .timeout(const Duration(seconds: 60));
+      final responseData = jsonDecode(response.body);
+
+      print('Response Body $responseData');
+      if(mounted){
+        if (response.statusCode == 200 && responseData['code'] == 200) {
+          dismissDialog(context);
+          linkedAccountResource = responseData['data']['attributes']['resource_id'];
+          print('Resource Id $linkedAccountResource');
+          setState(() {
+            showPinForm = true;
+          });
+        }
+        else if(response.statusCode == 200 && responseData['code'] == 422){
+          dismissDialog(context);
+          showErrorMessage(context, 'Oops', responseData['errors'].toString(),
+                  () {
+                Navigator.pop(context);
+              });
+        }
+        else{
+          dismissDialog(context);
+          showErrorMessage(context, 'Oops', 'Something went wrong',
+                  () {
+                Navigator.pop(context);
+              });
+        }
+      }
+    } catch (e) {
+      if(mounted){
+        print('Connection Error $e');
+        dismissDialog(context);
+        showErrorMessage(context, 'Oops', 'An unexpected error occurred',
+                () {
+              Navigator.pop(context);
+            });
+      }
+    }
+  }
+
+  void approveSusuCreation() async {
+    showLoadingDialog(context);
+    try {
+      final response = await ApiService().approveGoalGetterSusu(linkedAccountResource,
+          pinController.text, token)
+          .timeout(const Duration(seconds: 60));
+      final responseData = jsonDecode(response.body);
+
+      print('Response Body $responseData');
+      if(mounted){
+        if (response.statusCode == 200 && responseData['code'] == 200) {
+          dismissDialog(context);
+          showCongratulationMessage(context, 'Congratulations',
+              'Your goal getter susu has been created. You will be debited GHS ${amountController.text} ${frequencyController.text}. We advise you always maintain such balance in your ${linkedAccountController.text} mobile money wallet for successful debit.',
+              'Ok', () {
+                Navigator.pop(context);
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => DashboardScreen(selectedBottomIndex: 1, initialPage: 1)), (_) => false
+                );
+              });
+        }
+        else if(response.statusCode == 200 && responseData['code'] == 422){
+          dismissDialog(context);
+          showErrorMessage(context, 'Oops', responseData['errors'].toString(),
+                  () {
+                Navigator.pop(context);
+              });
+        }
+        else{
+          dismissDialog(context);
+          showErrorMessage(context, 'Oops', 'Something went wrong',
+                  () {
+                Navigator.pop(context);
+              });
+        }
+      }
+    } catch (e) {
+      if(mounted){
+        print('Connection Error $e');
+        dismissDialog(context);
+        showErrorMessage(context, 'Oops', 'An unexpected error occurred',
+                () {
+              Navigator.pop(context);
+            });
+      }
+    }
+  }
+
   void checkValidity(){
     enableFormOneButton = accountNameController.text.length > 1 &&
         amountController.text.isNotEmpty &&
         linkedAccountController.text.isNotEmpty &&
         purposeController.text.length > 1 &&
-        frequencyController.text.isNotEmpty;
+        frequencyController.text.isNotEmpty &&
+        durationController.text.isNotEmpty &&
+        startController.text.isNotEmpty;
   }
 }
 

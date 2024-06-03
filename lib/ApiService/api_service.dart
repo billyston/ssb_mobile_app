@@ -1,12 +1,17 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:susubox/model/biz_susu_account.dart';
+import 'package:susubox/model/flexy_susu_account.dart';
+import 'package:susubox/model/goal_getter_susu_account.dart';
 import 'package:susubox/model/linked_accounts.dart';
 import 'package:susubox/model/network_schemes.dart';
+import 'package:susubox/model/personal_susu_account.dart';
 import 'package:susubox/model/susu_accounts.dart';
 import 'package:susubox/model/susu_schemes.dart';
 
 import '../constants/ApiConstants.dart';
+import '../model/transaction_history.dart';
 
 class ApiService {
 
@@ -362,7 +367,8 @@ class ApiService {
           "account_name": accountName,
           "purpose": purpose,
           "susu_amount": amount,
-          "rollover_debit": true
+          "rollover_debit": true,
+          "accepted_terms": true
         },
 
         "relationships":
@@ -422,7 +428,8 @@ class ApiService {
           "purpose": purpose,
           "susu_amount": amount,
           "frequency": frequency,
-          "rollover_debit": true
+          "rollover_debit": true,
+          "accepted_terms": true
         },
 
         "relationships":
@@ -472,6 +479,131 @@ class ApiService {
     );
   }
 
+  Future<http.Response> createGoalGetterSusu(String accountName, String purpose, String amount, String startDate, String duration, String frequency, String accountResourceId, String token) async {
+    final requestBody = {
+      "data":
+      {
+        "type": "GoalGetterSusu",
+        "attributes":
+        {
+          "account_name": accountName,
+          "purpose": purpose,
+          "target_amount": amount,
+          "start_date": startDate,
+          "duration": duration,
+          "frequency": frequency,
+          "rollover_debit": true,
+          "accepted_terms": true
+        },
+
+        "relationships":
+        {
+          "linked_account":
+          {
+            "type" : "LinkedAccount",
+            "attributes":
+            {
+              "resource_id": accountResourceId
+            }
+          }
+        }
+      }
+    };
+
+    return await http.post(
+      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.createGoalGetterSusu}'),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json"
+      },
+      body: jsonEncode(requestBody),
+    );
+  }
+
+  Future<http.Response> approveGoalGetterSusu(String linkedAccount, String pin, String token) async {
+    final requestBody = {
+      "data":
+      {
+        "type": "Pin",
+        "attributes":
+        {
+          "pin": pin
+        }
+      }
+    };
+
+    return await http.post(
+      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.approveGoalGetterSusu}$linkedAccount${ApiConstants.approvals}'),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json"
+      },
+      body: jsonEncode(requestBody),
+    );
+  }
+
+  Future<http.Response> createFlexySusu(String accountName, String purpose, String minAmount, String maxAmount, String frequency, String accountResourceId, String token) async {
+    final requestBody = {
+      "data":
+      {
+        "type": "FlexySusu",
+        "attributes":
+        {
+          "account_name": accountName,
+          "purpose": purpose,
+          "min_amount": minAmount,
+          "max_amount": maxAmount,
+          "frequency": frequency,
+          "rollover_debit": true,
+          "accepted_terms": true
+        },
+
+        "relationships":
+        {
+          "linked_account":
+          {
+            "type" : "LinkedAccount",
+            "attributes":
+            {
+              "resource_id": accountResourceId
+            }
+          }
+        }
+      }
+    };
+
+    return await http.post(
+      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.createFlexySusu}'),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json"
+      },
+      body: jsonEncode(requestBody),
+    );
+  }
+
+  Future<http.Response> approveFlexySusu(String linkedAccount, String pin, String token) async {
+    final requestBody = {
+      "data":
+      {
+        "type": "Pin",
+        "attributes":
+        {
+          "pin": pin
+        }
+      }
+    };
+
+    return await http.post(
+      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.approveFlexySusu}$linkedAccount${ApiConstants.approvals}'),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json"
+      },
+      body: jsonEncode(requestBody),
+    );
+  }
+
   Future<SusuAccounts> getSusuAccounts(String token) async {
     final response = await http.get(
       Uri.parse('${ApiConstants.baseUrl}${ApiConstants.getAllSusu}'),
@@ -494,5 +626,136 @@ class ApiService {
     }
   }
 
+  Future<PersonalSusuAccount> getPersonalSusuAccount(String token, String susuResourceId) async {
+    final response = await http.get(
+      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.getPersonalSusu}$susuResourceId'),
+      headers: {
+        "Authorization" : "Bearer $token",
+        "Content-Type": "application/json"
+      },
+    );
+
+    if (response.statusCode == 200) {
+
+      final decodedData = json.decode(response.body);
+      print(decodedData);
+
+      PersonalSusuAccount susuAccount = personalSusuAccountFromJson(json.encode(decodedData));
+
+      return susuAccount;
+    } else {
+      throw Exception('Failed to load personal susu account');
+    }
+  }
+
+  Future<BizSusuAccount> getBizSusuAccount(String token, String susuResourceId) async {
+    final response = await http.get(
+      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.getBizSusu}$susuResourceId'),
+      headers: {
+        "Authorization" : "Bearer $token",
+        "Content-Type": "application/json"
+      },
+    );
+
+    if (response.statusCode == 200) {
+
+      final decodedData = json.decode(response.body);
+      print(decodedData);
+
+      BizSusuAccount susuAccount = bizSusuAccountFromJson(json.encode(decodedData));
+
+      return susuAccount;
+    } else {
+      throw Exception('Failed to load biz susu account');
+    }
+  }
+
+  Future<GoalGetterSusuAccount> getGoalGetterSusuAccount(String token, String susuResourceId) async {
+    final response = await http.get(
+      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.getGoalGetterSusu}$susuResourceId'),
+      headers: {
+        "Authorization" : "Bearer $token",
+        "Content-Type": "application/json"
+      },
+    );
+
+    if (response.statusCode == 200) {
+
+      final decodedData = json.decode(response.body);
+      print(decodedData);
+
+      GoalGetterSusuAccount susuAccount = goalGetterSusuAccountFromJson(json.encode(decodedData));
+
+      return susuAccount;
+    } else {
+      throw Exception('Failed to load goal getter susu account');
+    }
+  }
+
+  Future<FlexySusuAccount> getFlexySusuAccount(String token, String susuResourceId) async {
+    final response = await http.get(
+      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.getFlexySusu}$susuResourceId'),
+      headers: {
+        "Authorization" : "Bearer $token",
+        "Content-Type": "application/json"
+      },
+    );
+
+    if (response.statusCode == 200) {
+
+      final decodedData = json.decode(response.body);
+      print(decodedData);
+
+      FlexySusuAccount susuAccount = flexySusuAccountFromJson(json.encode(decodedData));
+
+      return susuAccount;
+    } else {
+      throw Exception('Failed to load flexy susu account');
+    }
+  }
+
+  Future<http.Response> getBalance(String resourceId, String pin, String token) async {
+    final requestBody = {
+      "data":
+      {
+        "type": "Pin",
+        "attributes":
+        {
+          "pin": pin
+        }
+      }
+    };
+
+    return await http.post(
+      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.getBalance}$resourceId/balances'),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json"
+      },
+      body: jsonEncode(requestBody),
+    );
+  }
+
+  Future<TransactionHistory> getTransactionHistory(String token, String susuResourceId, int size) async {
+    final response = await http.get(
+      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.getTransactionHistory}$susuResourceId/transactions?size=$size'),
+      headers: {
+        "Authorization" : "Bearer $token",
+        "Content-Type": "application/json"
+      },
+    );
+
+    if (response.statusCode == 200) {
+
+      final decodedData = json.decode(response.body);
+      print(decodedData);
+
+      TransactionHistory transactionHistory = transactionHistoryFromJson(json.encode(decodedData));
+
+      return transactionHistory;
+    } else {
+      throw Exception('Failed to get transaction history');
+    }
+  }
 
 }

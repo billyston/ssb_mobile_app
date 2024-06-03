@@ -63,6 +63,7 @@ class Datum {
 class Attributes {
   String resourceId;
   String name;
+  String alias;
   String code;
   String description;
   String status;
@@ -70,6 +71,7 @@ class Attributes {
   Attributes({
     required this.resourceId,
     required this.name,
+    required this.alias,
     required this.code,
     required this.description,
     required this.status,
@@ -78,6 +80,7 @@ class Attributes {
   factory Attributes.fromJson(Map<String, dynamic> json) => Attributes(
     resourceId: json["resource_id"],
     name: json["name"],
+    alias: json["alias"],
     code: json["code"],
     description: json["description"],
     status: json["status"],
@@ -86,6 +89,7 @@ class Attributes {
   Map<String, dynamic> toJson() => {
     "resource_id": resourceId,
     "name": name,
+    "alias": alias,
     "code": code,
     "description": description,
     "status": status,

@@ -9,6 +9,7 @@ import 'package:susubox/components/loading_dialog.dart';
 import '../../ApiService/api_service.dart';
 import '../../components/error_container.dart';
 import '../../components/dialogs/link_account_dialog.dart';
+import '../../dashboard/dashboard_screen.dart';
 import '../../model/linked_accounts.dart';
 import '../../utils/utils.dart';
 
@@ -588,10 +589,11 @@ class _CreateBizSusuScreenState extends State<CreateBizSusuScreen> {
               'Your biz susu has been created. You will be debited GHS${amountController.text} ${frequencyController.text}. We advise you always maintain such balance in your ${linkedAccountController
                   .text} mobile money wallet for successful debit.',
               'Ok', () {
-                int count = 0;
-                Navigator.popUntil(context, (route) {
-                  return count++ == 2;
-                });
+                Navigator.pop(context);
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => DashboardScreen(selectedBottomIndex: 1, initialPage: 1)), (_) => false
+                );
               });
         }
         else if(response.statusCode == 200 && responseData['code'] == 422){
